@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { formatDateJp } from "@/lib/types";
 import { EditTextModal } from "./EditTextModal";
 import { EditDateModal } from "./EditDateModal";
@@ -23,18 +23,36 @@ export function TaskItem({ task, missionId, onChanged }: TaskItemProps) {
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const [showRenameModal, setShowRenameModal] = useState(false);
   const [showDueModal, setShowDueModal] = useState(false);
+  const [optimisticDone, setOptimisticDone] = useState<boolean | null>(null);
+
+  const displayedDone = optimisticDone ?? task.done;
+  useEffect(() => {
+    if (optimisticDone !== null && task.done === optimisticDone) {
+      setOptimisticDone(null);
+    }
+  }, [optimisticDone, task.done]);
+  const displayedCompletedAt = optimisticDone === true && !task.completedAt
+    ? new Date().toISOString().slice(0, 10)
+    : task.completedAt;
 
   const handleToggle = async () => {
+    const nextDone = !displayedDone;
+    setOptimisticDone(nextDone);
+
     try {
       const res = await fetch(`/api/tasks/${task.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ done: !task.done }),
+        body: JSON.stringify({ done: nextDone }),
         credentials: "same-origin",
       });
-      if (res.ok) onChanged?.();
+      if (res.ok) {
+        onChanged?.();
+      } else {
+        setOptimisticDone(task.done);
+      }
     } catch {
-      // ignore
+      setOptimisticDone(task.done);
     }
   };
 
@@ -94,26 +112,26 @@ export function TaskItem({ task, missionId, onChanged }: TaskItemProps) {
     >
       <input
         type="checkbox"
-        checked={task.done}
+        checked={displayedDone}
         onChange={handleToggle}
         className="rounded cursor-pointer w-5 h-5 sm:w-4 sm:h-4 flex-shrink-0 mt-0.5 sm:mt-0"
       />
       <div className="flex-1 min-w-0">
         <div
-          className={`break-words ${task.done ? "line-through text-gray-500" : "text-gray-200"}`}
+          className={`break-words ${displayedDone ? "line-through text-gray-500" : "text-gray-200"}`}
         >
           {task.name}
         </div>
-        {(task.dueDate || task.completedAt) && (
+        {(task.dueDate || displayedCompletedAt) && (
           <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 text-xs">
             {task.dueDate && (
               <span className="text-blue-400 font-medium">
                 期限: {formatDateJp(task.dueDate)}
               </span>
             )}
-            {task.completedAt && (
+            {displayedCompletedAt && (
               <span className="text-emerald-400 font-medium">
-                完了: {formatDateJp(task.completedAt)}
+                完了: {formatDateJp(displayedCompletedAt)}
               </span>
             )}
           </div>

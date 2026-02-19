@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { missionProgress, formatDateJp, sortTasksByDueAndIncomplete } from "@/lib/types";
 import { TaskItem } from "./TaskItem";
 import { Modal } from "./Modal";
@@ -164,12 +165,17 @@ export function MissionCard({ mission, genre, onChanged }: MissionCardProps) {
             <p className="text-gray-400 text-sm">{mission.summary}</p>
           )}
           {tasks.map((t) => (
-            <TaskItem
+            <motion.div
               key={t.id}
-              task={t}
-              missionId={mission.id}
-              onChanged={onChanged}
-            />
+              layout
+              transition={{ type: "spring", stiffness: 400, damping: 35 }}
+            >
+              <TaskItem
+                task={t}
+                missionId={mission.id}
+                onChanged={onChanged}
+              />
+            </motion.div>
           ))}
           <div className="flex justify-end pt-2">
             <button

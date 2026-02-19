@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { MissionCard } from "./MissionCard";
 import { Modal } from "./Modal";
 import { sortMissionsByDueAndIncomplete } from "@/lib/types";
@@ -59,7 +60,13 @@ export function MissionList({ selectedGenre, refetch }: MissionListProps) {
 
       <div className="flex-1 overflow-y-auto space-y-4">
         {missions.map((m) => (
-          <MissionCard key={m.id} mission={m} genre={selectedGenre!} onChanged={refetch} />
+          <motion.div
+            key={m.id}
+            layout
+            transition={{ type: "spring", stiffness: 350, damping: 30 }}
+          >
+            <MissionCard mission={m} genre={selectedGenre!} onChanged={refetch} />
+          </motion.div>
         ))}
       </div>
 
