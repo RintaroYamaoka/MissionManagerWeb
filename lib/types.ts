@@ -48,7 +48,9 @@ export function formatDateJp(dateStr: string | null | undefined): string {
 }
 
 /** 期限が早く・未完了のミッションを上に。同条件は order でタイブレーク */
-export function sortMissionsByDueAndIncomplete(missions: Mission[]): Mission[] {
+export function sortMissionsByDueAndIncomplete<T extends { dueDate?: string | Date | null; order: number; tasks?: { done: boolean }[] }>(
+  missions: T[]
+): T[] {
   return [...missions].sort((a, b) => {
     const aIncomplete = missionProgress(a) < 1;
     const bIncomplete = missionProgress(b) < 1;
@@ -61,7 +63,9 @@ export function sortMissionsByDueAndIncomplete(missions: Mission[]): Mission[] {
 }
 
 /** 期限が早く・未完了のタスクを上に。同条件は order でタイブレーク */
-export function sortTasksByDueAndIncomplete(tasks: Task[]): Task[] {
+export function sortTasksByDueAndIncomplete<T extends { done: boolean; dueDate?: string | Date | null; order: number }>(
+  tasks: T[]
+): T[] {
   return [...tasks].sort((a, b) => {
     if (a.done !== b.done) return a.done ? 1 : -1;
     const aDue = a.dueDate ? new Date(a.dueDate).getTime() : Infinity;
