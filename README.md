@@ -5,6 +5,10 @@
 </p>
 
 <p align="center">
+  <a href="https://mission-manager-web.vercel.app/">🌐 アプリを開く</a>
+</p>
+
+<p align="center">
   <a href="#技術スタック">技術スタック</a> •
   <a href="#機能">機能</a> •
   <a href="#セットアップ">セットアップ</a>
@@ -14,7 +18,7 @@
 
 ## 概要
 
-**Mission Manager Web** は、プロジェクトを「ジャンル → ミッション → タスク」の3階層で整理し、進捗を可視化しながら管理できるWebアプリです。デスクトップ版 [MissionManager](https://github.com/yourusername/MissionManager) のWeb版として開発しています。
+**Mission Manager Web** は、プロジェクトを「ジャンル → ミッション → タスク」の3階層で整理し、進捗を可視化しながら管理できるWebアプリです。デスクトップ版 [MissionManager](https://github.com/RintaroYamaoka/MissionManager) のWeb版として開発しています。
 
 ### こんな方に向いています
 
@@ -58,7 +62,7 @@
 ### 1. クローン & インストール
 
 ```bash
-git clone https://github.com/yourusername/MissionManagerWeb.git
+git clone https://github.com/RintaroYamaoka/MissionManagerWeb.git
 cd MissionManagerWeb
 npm install
 ```
