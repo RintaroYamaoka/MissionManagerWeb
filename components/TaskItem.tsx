@@ -84,7 +84,7 @@ export function TaskItem({ task, missionId, onChanged }: TaskItemProps) {
 
   return (
     <div
-      className="flex flex-wrap sm:flex-nowrap items-start sm:items-center gap-2 py-3 px-3 sm:py-1.5 sm:px-2 rounded hover:bg-gray-700/50 active:bg-gray-700/70 min-h-[44px] touch-manipulation"
+      className="flex gap-2 py-3 px-3 sm:py-1.5 sm:px-2 rounded hover:bg-gray-700/50 active:bg-gray-700/70 min-h-[44px] touch-manipulation"
       onClick={(e) => e.stopPropagation()}
       onContextMenu={(e) => {
         e.preventDefault();
@@ -98,21 +98,25 @@ export function TaskItem({ task, missionId, onChanged }: TaskItemProps) {
         onChange={handleToggle}
         className="rounded cursor-pointer w-5 h-5 sm:w-4 sm:h-4 flex-shrink-0 mt-0.5 sm:mt-0"
       />
-      <span
-        className={`flex-1 min-w-0 break-words ${task.done ? "line-through text-gray-500" : "text-gray-200"}`}
-      >
-        {task.name}
-      </span>
-      <div className="flex flex-wrap gap-x-3 gap-y-1 w-full sm:w-auto sm:flex-shrink-0 text-xs">
-        {task.dueDate && (
-          <span className="text-blue-400 font-medium">
-            期限: {formatDateJp(task.dueDate)}
-          </span>
-        )}
-        {task.completedAt && (
-          <span className="text-emerald-400 font-medium">
-            完了: {formatDateJp(task.completedAt)}
-          </span>
+      <div className="flex-1 min-w-0">
+        <div
+          className={`break-words ${task.done ? "line-through text-gray-500" : "text-gray-200"}`}
+        >
+          {task.name}
+        </div>
+        {(task.dueDate || task.completedAt) && (
+          <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 text-xs">
+            {task.dueDate && (
+              <span className="text-blue-400 font-medium">
+                期限: {formatDateJp(task.dueDate)}
+              </span>
+            )}
+            {task.completedAt && (
+              <span className="text-emerald-400 font-medium">
+                完了: {formatDateJp(task.completedAt)}
+              </span>
+            )}
+          </div>
         )}
       </div>
 
