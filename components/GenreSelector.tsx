@@ -146,7 +146,7 @@ export function GenreSelector({
   return (
     <div className="flex flex-col gap-2 mb-4">
       <div
-        className="flex gap-2 items-center"
+        className="flex flex-col sm:flex-row gap-2 sm:items-center"
         onContextMenu={(e) => {
           if (selectedGenre) {
             e.preventDefault();
@@ -155,7 +155,7 @@ export function GenreSelector({
         }}
       >
         <select
-          className="border border-gray-600 rounded px-3 py-2 flex-1 bg-gray-800 text-gray-100"
+          className="border border-gray-600 rounded px-3 py-2.5 min-h-[44px] flex-1 w-full bg-gray-800 text-gray-100 touch-manipulation"
           value={selectedGenre?.id ?? ""}
           onChange={(e) => {
             const id = e.target.value;
@@ -181,7 +181,7 @@ export function GenreSelector({
         <button
           type="button"
           onClick={() => setShowAddModal(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500"
+          className="px-4 py-2.5 min-h-[44px] bg-blue-600 text-white rounded hover:bg-blue-500 active:bg-blue-700 touch-manipulation"
         >
           追加
         </button>
@@ -223,14 +223,14 @@ export function GenreSelector({
             <button
               type="button"
               onClick={() => setShowAddModal(false)}
-              className="px-4 py-2 border border-gray-600 rounded hover:bg-gray-700 text-gray-200"
+              className="px-4 py-2.5 min-h-[44px] border border-gray-600 rounded hover:bg-gray-700 active:bg-gray-600 text-gray-200 touch-manipulation"
             >
               キャンセル
             </button>
             <button
               type="button"
               onClick={handleAdd}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500"
+              className="px-4 py-2.5 min-h-[44px] bg-blue-600 text-white rounded hover:bg-blue-500 active:bg-blue-700 touch-manipulation"
             >
               OK
             </button>

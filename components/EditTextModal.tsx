@@ -61,7 +61,7 @@ export function EditTextModal({
             onChange={(e) => setValue(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
-            className="w-full border border-gray-600 rounded px-3 py-2 bg-gray-800 text-gray-100 placeholder-gray-500 min-h-[80px]"
+            className="w-full border border-gray-600 rounded px-3 py-2.5 min-h-[80px] bg-gray-800 text-gray-100 placeholder-gray-500 text-base"
             rows={4}
           />
         ) : (
@@ -72,21 +72,21 @@ export function EditTextModal({
             onChange={(e) => setValue(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
-            className="w-full border border-gray-600 rounded px-3 py-2 bg-gray-800 text-gray-100 placeholder-gray-500"
+            className="w-full border border-gray-600 rounded px-3 py-2.5 min-h-[44px] bg-gray-800 text-gray-100 placeholder-gray-500 text-base"
           />
         )}
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-end gap-2 flex-wrap">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 border border-gray-600 rounded hover:bg-gray-700 text-gray-200"
+            className="px-4 py-2.5 min-h-[44px] border border-gray-600 rounded hover:bg-gray-700 active:bg-gray-600 text-gray-200 touch-manipulation"
           >
             キャンセル
           </button>
           <button
             type="button"
             onClick={handleSubmit}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500"
+            className="px-4 py-2.5 min-h-[44px] bg-blue-600 text-white rounded hover:bg-blue-500 active:bg-blue-700 touch-manipulation"
           >
             OK
           </button>

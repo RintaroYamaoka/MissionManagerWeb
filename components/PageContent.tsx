@@ -14,7 +14,7 @@ export function PageContent() {
     : null;
 
   return (
-    <div className="flex flex-col min-h-0 flex-1 pb-4" style={{ minHeight: "calc(100vh - 120px)" }}>
+    <div className="flex flex-col min-h-0 flex-1 pb-4" style={{ minHeight: "calc(100dvh - 140px)" }}>
       <GenreSelector
         genres={genres}
         loading={loading}

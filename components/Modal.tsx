@@ -35,11 +35,11 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
       onClick={(e) => e.target === overlayRef.current && onClose()}
     >
       <div
-        className="bg-gray-800 text-gray-100 rounded-lg shadow-xl border border-gray-700 max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto"
+        className="bg-gray-800 text-gray-100 rounded-lg shadow-xl border border-gray-700 max-w-md w-full mx-4 max-h-[90dvh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="px-4 py-3 border-b border-gray-700 font-semibold text-lg">{title}</div>
-        <div className="p-4">{children}</div>
+        <div className="p-4 pb-modal-safe">{children}</div>
       </div>
     </div>
   );

@@ -123,39 +123,39 @@ export function MissionCard({ mission, genre, onChanged }: MissionCardProps) {
 
   return (
     <div
-      className="border border-gray-700 rounded-lg p-4 bg-gray-800 shadow-sm hover:bg-gray-700/50 cursor-pointer"
+      className="border border-gray-700 rounded-lg p-4 bg-gray-800 shadow-sm hover:bg-gray-700/50 active:bg-gray-700/70 cursor-pointer touch-manipulation"
       onClick={(e) => !(e.target as HTMLElement).closest("button") && !(e.target as HTMLElement).closest("input") && setExpanded(!expanded)}
       onContextMenu={(e) => {
         e.preventDefault();
         setContextMenu({ x: e.clientX, y: e.clientY });
       }}
     >
-      <div className="flex justify-between items-start gap-4">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-4">
         <div className="flex-1 min-w-0">
-          <h3 className="font-medium">{mission.name}</h3>
-          <div className="flex gap-4 mt-1 text-sm">
-            <span className="text-blue-400 font-medium min-w-[9rem]">
+          <h3 className="font-medium break-words">{mission.name}</h3>
+          <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-sm">
+            <span className="text-blue-400 font-medium">
               期限: {dueDate ? formatDateJp(dueDate) : "未設定"}
             </span>
-            <span className="text-emerald-400 font-medium min-w-[9rem]">
+            <span className="text-emerald-400 font-medium">
               完了: {progress >= 1 && completedAt ? formatDateJp(completedAt) : "-"}
             </span>
           </div>
         </div>
-        <div className="flex-[2] min-w-[6rem]">
-          <div className="h-2 bg-gray-700 rounded overflow-hidden">
+        <div className="flex items-center gap-3 sm:flex-[2] sm:min-w-[6rem]">
+          <div className="flex-1 min-w-0 h-2 bg-gray-700 rounded overflow-hidden">
             <div
               className="h-full bg-blue-500 transition-all"
               style={{ width: `${progress * 100}%` }}
             />
           </div>
-          <div className="text-sm text-gray-400 text-right mt-1 font-medium">
+          <span className="text-sm text-gray-400 font-medium flex-shrink-0 w-10 text-right">
             {Math.round(progress * 100)}%
-          </div>
+          </span>
+          <span className="text-gray-500 flex-shrink-0 text-lg">
+            {expanded ? "▲" : "▼"}
+          </span>
         </div>
-        <span className="text-gray-500 flex-shrink-0">
-          {expanded ? "▲" : "▼"}
-        </span>
       </div>
 
       {expanded && (
@@ -178,7 +178,7 @@ export function MissionCard({ mission, genre, onChanged }: MissionCardProps) {
                 e.stopPropagation();
                 setShowTaskAddModal(true);
               }}
-              className="px-3 py-1.5 text-sm border border-gray-600 rounded hover:bg-gray-700 text-gray-200"
+              className="px-4 py-2.5 min-h-[44px] text-sm border border-gray-600 rounded hover:bg-gray-700 active:bg-gray-600 text-gray-200 touch-manipulation"
             >
               タスク追加
             </button>
@@ -221,18 +221,18 @@ export function MissionCard({ mission, genre, onChanged }: MissionCardProps) {
               </button>
             </div>
           </div>
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-end gap-2 flex-wrap">
             <button
               type="button"
               onClick={() => setShowTaskAddModal(false)}
-              className="px-4 py-2 border border-gray-600 rounded hover:bg-gray-700 text-gray-200"
+              className="px-4 py-2.5 min-h-[44px] border border-gray-600 rounded hover:bg-gray-700 active:bg-gray-600 text-gray-200 touch-manipulation"
             >
               キャンセル
             </button>
             <button
               type="button"
               onClick={handleAddTask}
-              className="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-500"
+              className="px-4 py-2.5 min-h-[44px] bg-emerald-600 text-white rounded hover:bg-emerald-500 active:bg-emerald-700 touch-manipulation"
             >
               OK
             </button>

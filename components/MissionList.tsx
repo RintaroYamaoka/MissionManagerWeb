@@ -68,7 +68,7 @@ export function MissionList({ selectedGenre, refetch }: MissionListProps) {
           type="button"
           onClick={() => selectedGenre && setShowAddModal(true)}
           disabled={!selectedGenre}
-          className="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full sm:w-auto px-4 py-2.5 min-h-[44px] bg-emerald-600 text-white rounded-md hover:bg-emerald-500 active:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
         >
           ミッション追加
         </button>
@@ -103,34 +103,34 @@ export function MissionList({ selectedGenre, refetch }: MissionListProps) {
           </div>
           <div>
             <label className="block text-sm font-medium mb-1 text-gray-200">期限:</label>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <input
                 type="date"
                 value={addDueDate}
                 onChange={(e) => setAddDueDate(e.target.value)}
-                className="border border-gray-600 rounded px-3 py-2 bg-gray-800 text-gray-100"
+                className="border border-gray-600 rounded px-3 py-2.5 min-h-[44px] bg-gray-800 text-gray-100 flex-1"
               />
               <button
                 type="button"
                 onClick={() => setAddDueDate("")}
-                className="px-3 py-2 border border-gray-600 rounded hover:bg-gray-700 text-gray-200"
+                className="px-4 py-2.5 min-h-[44px] border border-gray-600 rounded hover:bg-gray-700 active:bg-gray-600 text-gray-200 touch-manipulation"
               >
                 解除
               </button>
             </div>
           </div>
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-end gap-2 flex-wrap">
             <button
               type="button"
               onClick={() => setShowAddModal(false)}
-              className="px-4 py-2 border border-gray-600 rounded hover:bg-gray-700 text-gray-200"
+              className="px-4 py-2.5 min-h-[44px] border border-gray-600 rounded hover:bg-gray-700 active:bg-gray-600 text-gray-200 touch-manipulation"
             >
               キャンセル
             </button>
             <button
               type="button"
               onClick={handleAddMission}
-              className="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-500"
+              className="px-4 py-2.5 min-h-[44px] bg-emerald-600 text-white rounded hover:bg-emerald-500 active:bg-emerald-700 touch-manipulation"
             >
               OK
             </button>

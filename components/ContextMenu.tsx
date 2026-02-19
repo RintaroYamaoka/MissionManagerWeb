@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 export interface ContextMenuItem {
   label: string;
@@ -16,6 +16,24 @@ interface ContextMenuProps {
 
 export function ContextMenu({ x, y, items, onClose }: ContextMenuProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState({ left: x, top: y });
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const safe = 8;
+      let left = x;
+      let top = y;
+      if (left + rect.width > vw - safe) left = vw - rect.width - safe;
+      if (left < safe) left = safe;
+      if (top + rect.height > vh - safe) top = vh - rect.height - safe;
+      if (top < safe) top = safe;
+      setPosition({ left, top });
+    }
+  }, [x, y]);
 
   useEffect(() => {
     const handleClick = () => onClose();
@@ -32,14 +50,14 @@ export function ContextMenu({ x, y, items, onClose }: ContextMenuProps) {
     <div
       ref={ref}
       className="fixed z-50 min-w-[140px] py-1 bg-gray-800 text-gray-100 border border-gray-700 rounded shadow-lg"
-      style={{ left: x, top: y }}
+      style={{ left: position.left, top: position.top }}
       onClick={(e) => e.stopPropagation()}
     >
       {items.map((item) => (
         <button
           key={item.label}
           type="button"
-          className="w-full px-4 py-2 text-left text-sm hover:bg-gray-700"
+          className="w-full px-4 py-3 min-h-[44px] text-left text-sm hover:bg-gray-700 active:bg-gray-600 touch-manipulation flex items-center"
           onClick={(e) => {
             e.stopPropagation();
             onClose();

@@ -42,34 +42,34 @@ export function EditDateModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title}>
       <div className="space-y-4">
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <input
             ref={inputRef}
             type="date"
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            className="flex-1 border border-gray-600 rounded px-3 py-2 bg-gray-800 text-gray-100"
+            className="flex-1 border border-gray-600 rounded px-3 py-2.5 min-h-[44px] bg-gray-800 text-gray-100"
           />
           <button
             type="button"
             onClick={handleClear}
-            className="px-3 py-2 border border-gray-600 rounded hover:bg-gray-700 text-gray-200"
+            className="px-4 py-2.5 min-h-[44px] border border-gray-600 rounded hover:bg-gray-700 active:bg-gray-600 text-gray-200 touch-manipulation"
           >
             解除
           </button>
         </div>
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-end gap-2 flex-wrap">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 border border-gray-600 rounded hover:bg-gray-700 text-gray-200"
+            className="px-4 py-2.5 min-h-[44px] border border-gray-600 rounded hover:bg-gray-700 active:bg-gray-600 text-gray-200 touch-manipulation"
           >
             キャンセル
           </button>
           <button
             type="button"
             onClick={handleSubmit}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500"
+            className="px-4 py-2.5 min-h-[44px] bg-blue-600 text-white rounded hover:bg-blue-500 active:bg-blue-700 touch-manipulation"
           >
             OK
           </button>
