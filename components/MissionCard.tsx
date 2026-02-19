@@ -20,9 +20,10 @@ interface MissionCardProps {
   mission: Mission;
   genre: Genre;
   onChanged?: () => void;
+  updateTaskOptimistic?: (genreId: string, missionId: string, taskId: string, done: boolean, completedAt: string | null) => void;
 }
 
-export function MissionCard({ mission, genre, onChanged }: MissionCardProps) {
+export function MissionCard({ mission, genre, onChanged, updateTaskOptimistic }: MissionCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const [showTaskAddModal, setShowTaskAddModal] = useState(false);
@@ -173,7 +174,9 @@ export function MissionCard({ mission, genre, onChanged }: MissionCardProps) {
               <TaskItem
                 task={t}
                 missionId={mission.id}
+                genreId={genre.id}
                 onChanged={onChanged}
+                updateTaskOptimistic={updateTaskOptimistic}
               />
             </motion.div>
           ))}

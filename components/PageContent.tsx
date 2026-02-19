@@ -8,7 +8,7 @@ import type { Genre } from "@/lib/types";
 
 export function PageContent() {
   const [selectedGenreId, setSelectedGenreId] = useState<string | null>(null);
-  const { genres, loading, error, refetch } = useGenres();
+  const { genres, loading, error, refetch, refetchSilent, updateTaskOptimistic } = useGenres();
   const selectedGenre = selectedGenreId
     ? genres.find((g) => g.id === selectedGenreId) ?? null
     : null;
@@ -20,10 +20,16 @@ export function PageContent() {
         loading={loading}
         error={error}
         refetch={refetch}
+        refetchSilent={refetchSilent}
         selectedGenre={selectedGenre}
         onSelect={(g) => setSelectedGenreId(g?.id ?? null)}
       />
-      <MissionList selectedGenre={selectedGenre} refetch={refetch} />
+      <MissionList
+        selectedGenre={selectedGenre}
+        refetch={refetch}
+        refetchSilent={refetchSilent}
+        updateTaskOptimistic={updateTaskOptimistic}
+      />
     </div>
   );
 }

@@ -16,10 +16,12 @@ function toDateInputValue(v: string | null | undefined): string {
 interface TaskItemProps {
   task: Task;
   missionId: string;
+  genreId?: string;
   onChanged?: () => void;
+  updateTaskOptimistic?: (genreId: string, missionId: string, taskId: string, done: boolean, completedAt: string | null) => void;
 }
 
-export function TaskItem({ task, missionId, onChanged }: TaskItemProps) {
+export function TaskItem({ task, missionId, genreId, onChanged, updateTaskOptimistic }: TaskItemProps) {
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const [showRenameModal, setShowRenameModal] = useState(false);
   const [showDueModal, setShowDueModal] = useState(false);
@@ -31,12 +33,15 @@ export function TaskItem({ task, missionId, onChanged }: TaskItemProps) {
       setOptimisticDone(null);
     }
   }, [optimisticDone, task.done]);
-  const displayedCompletedAt = optimisticDone === true && !task.completedAt
-    ? new Date().toISOString().slice(0, 10)
-    : task.completedAt;
+  const displayedCompletedAt = displayedDone ? (task.completedAt || new Date().toISOString().slice(0, 10)) : null;
 
   const handleToggle = async () => {
     const nextDone = !displayedDone;
+    const completedAt = nextDone ? new Date().toISOString().slice(0, 10) : null;
+
+    if (genreId && updateTaskOptimistic) {
+      updateTaskOptimistic(genreId, missionId, task.id, nextDone, completedAt);
+    }
     setOptimisticDone(nextDone);
 
     try {
@@ -50,9 +55,15 @@ export function TaskItem({ task, missionId, onChanged }: TaskItemProps) {
         onChanged?.();
       } else {
         setOptimisticDone(task.done);
+        if (genreId && updateTaskOptimistic) {
+          updateTaskOptimistic(genreId, missionId, task.id, task.done, task.completedAt);
+        }
       }
     } catch {
       setOptimisticDone(task.done);
+      if (genreId && updateTaskOptimistic) {
+        updateTaskOptimistic(genreId, missionId, task.id, task.done, task.completedAt);
+      }
     }
   };
 

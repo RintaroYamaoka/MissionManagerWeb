@@ -12,6 +12,7 @@ interface GenreSelectorProps {
   loading: boolean;
   error: string | null;
   refetch: () => Promise<void>;
+  refetchSilent?: () => Promise<void>;
   selectedGenre?: Genre | null;
   onSelect?: (genre: Genre | null) => void;
 }
@@ -21,6 +22,7 @@ export function GenreSelector({
   loading,
   error,
   refetch,
+  refetchSilent,
   selectedGenre,
   onSelect,
 }: GenreSelectorProps) {
@@ -58,7 +60,7 @@ export function GenreSelector({
       setAddSummary("");
       setShowAddModal(false);
       const data = await res.json();
-      await refetch();
+      await (refetchSilent ?? refetch)();
       onSelect?.(data.genre);
     } catch (e) {
       alert(e instanceof Error ? e.message : "不明なエラー");
@@ -81,7 +83,7 @@ export function GenreSelector({
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error ?? "操作に失敗しました");
       }
-      await refetch();
+      await (refetchSilent ?? refetch)();
       return true;
     } catch (e) {
       alert(e instanceof Error ? e.message : "不明なエラー");

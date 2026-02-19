@@ -10,9 +10,11 @@ import type { Genre, Mission } from "@/lib/types";
 interface MissionListProps {
   selectedGenre: Genre | null;
   refetch: () => Promise<void>;
+  refetchSilent?: () => Promise<void>;
+  updateTaskOptimistic?: (genreId: string, missionId: string, taskId: string, done: boolean, completedAt: string | null) => void;
 }
 
-export function MissionList({ selectedGenre, refetch }: MissionListProps) {
+export function MissionList({ selectedGenre, refetch, refetchSilent, updateTaskOptimistic }: MissionListProps) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [addName, setAddName] = useState("");
   const [addSummary, setAddSummary] = useState("");
@@ -46,7 +48,7 @@ export function MissionList({ selectedGenre, refetch }: MissionListProps) {
       setAddSummary("");
       setAddDueDate("");
       setShowAddModal(false);
-      await refetch();
+      await (refetchSilent ?? refetch)();
     } catch (e) {
       alert(e instanceof Error ? e.message : "不明なエラー");
     }
@@ -65,7 +67,12 @@ export function MissionList({ selectedGenre, refetch }: MissionListProps) {
             layout
             transition={{ type: "spring", stiffness: 350, damping: 30 }}
           >
-            <MissionCard mission={m} genre={selectedGenre!} onChanged={refetch} />
+            <MissionCard
+            mission={m}
+            genre={selectedGenre!}
+            onChanged={refetchSilent ?? refetch}
+            updateTaskOptimistic={updateTaskOptimistic}
+          />
           </motion.div>
         ))}
       </div>

@@ -7,7 +7,7 @@ export function Header() {
   const { data: session, status } = useSession();
 
   return (
-    <header className="border-b border-gray-700 mb-4 sm:mb-6 pb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 flex-shrink-0 min-h-[3.5rem]">
+    <header className="border-b border-gray-700 mb-4 sm:mb-6 pb-4 flex flex-row justify-between items-center gap-3 flex-shrink-0 min-h-[3.5rem]">
       <h1 className="text-xl sm:text-2xl font-bold text-gray-100 truncate min-w-0">MissionManagerWeb</h1>
       <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
         {status === "loading" && (
