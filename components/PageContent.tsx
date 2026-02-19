@@ -14,22 +14,29 @@ export function PageContent() {
     : null;
 
   return (
-    <div className="flex flex-col min-h-0 flex-1 pb-4" style={{ minHeight: "calc(100dvh - 140px)" }}>
-      <GenreSelector
-        genres={genres}
-        loading={loading}
-        error={error}
-        refetch={refetch}
-        refetchSilent={refetchSilent}
-        selectedGenre={selectedGenre}
-        onSelect={(g) => setSelectedGenreId(g?.id ?? null)}
-      />
-      <MissionList
-        selectedGenre={selectedGenre}
-        refetch={refetch}
-        refetchSilent={refetchSilent}
-        updateTaskOptimistic={updateTaskOptimistic}
-      />
+    <div
+      className="flex flex-col md:flex-row md:gap-6 min-h-0 flex-1 pb-4"
+      style={{ minHeight: "calc(100dvh - 140px)" }}
+    >
+      <aside className="md:w-64 md:flex-shrink-0 md:border-r md:border-gray-700 md:pr-4 md:overflow-y-auto">
+        <GenreSelector
+          genres={genres}
+          loading={loading}
+          error={error}
+          refetch={refetch}
+          refetchSilent={refetchSilent}
+          selectedGenre={selectedGenre}
+          onSelect={(g) => setSelectedGenreId(g?.id ?? null)}
+        />
+      </aside>
+      <div className="flex-1 min-w-0 flex flex-col min-h-0">
+        <MissionList
+          selectedGenre={selectedGenre}
+          refetch={refetch}
+          refetchSilent={refetchSilent}
+          updateTaskOptimistic={updateTaskOptimistic}
+        />
+      </div>
     </div>
   );
 }

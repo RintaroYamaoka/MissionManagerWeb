@@ -7,6 +7,10 @@ import { EditTextModal } from "./EditTextModal";
 import { ContextMenu } from "./ContextMenu";
 import type { Genre } from "@/lib/types";
 
+function cn(...classes: (string | undefined)[]) {
+  return classes.filter(Boolean).join(" ");
+}
+
 interface GenreSelectorProps {
   genres: Genre[];
   loading: boolean;
@@ -29,9 +33,10 @@ export function GenreSelector({
   const [showAddModal, setShowAddModal] = useState(false);
   const [addName, setAddName] = useState("");
   const [addSummary, setAddSummary] = useState("");
-  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; genre: Genre } | null>(null);
   const [showRenameModal, setShowRenameModal] = useState(false);
   const [showSummaryModal, setShowSummaryModal] = useState(false);
+  const [editingGenre, setEditingGenre] = useState<Genre | null>(null);
 
   useEffect(() => {
     if (!loading && !selectedGenre && genres.length > 0) {
@@ -91,68 +96,74 @@ export function GenreSelector({
     }
   };
 
-  const handleRename = () => {
-    if (selectedGenre) setShowRenameModal(true);
+  const menuTarget = contextMenu?.genre ?? selectedGenre;
+
+  const handleRename = (g: Genre) => {
+    setEditingGenre(g);
+    setShowRenameModal(true);
   };
 
   const handleRenameConfirm = async (name: string) => {
-    if (!selectedGenre) return;
-    await apiCall("PATCH", `/api/genres/${selectedGenre.id}`, { name });
+    const target = editingGenre ?? selectedGenre;
+    if (!target) return;
+    await apiCall("PATCH", `/api/genres/${target.id}`, { name });
     setShowRenameModal(false);
+    setEditingGenre(null);
   };
 
-  const handleEditSummary = () => {
-    if (selectedGenre) setShowSummaryModal(true);
+  const handleEditSummary = (g: Genre) => {
+    setEditingGenre(g);
+    setShowSummaryModal(true);
   };
 
   const handleSummaryConfirm = async (summary: string) => {
-    if (!selectedGenre) return;
-    await apiCall("PATCH", `/api/genres/${selectedGenre.id}`, {
+    const target = editingGenre ?? selectedGenre;
+    if (!target) return;
+    await apiCall("PATCH", `/api/genres/${target.id}`, {
       summary: summary || null,
     });
     setShowSummaryModal(false);
+    setEditingGenre(null);
   };
 
-  const handleDelete = async () => {
-    if (!selectedGenre) return;
-    if (!window.confirm(`ジャンル「${selectedGenre.name}」を削除しますか？`)) return;
-    await apiCall("DELETE", `/api/genres/${selectedGenre.id}`);
-    const idx = genres.findIndex((g) => g.id === selectedGenre.id);
+  const handleDelete = async (g: Genre) => {
+    if (!window.confirm(`ジャンル「${g.name}」を削除しますか？`)) return;
+    await apiCall("DELETE", `/api/genres/${g.id}`);
+    const idx = genres.findIndex((x) => x.id === g.id);
     const next = genres[idx + 1] ?? genres[idx - 1] ?? null;
     onSelect?.(next ?? null);
   };
 
-  const handleMoveUp = async () => {
-    if (!selectedGenre) return;
-    await apiCall("POST", `/api/genres/${selectedGenre.id}/move/up`);
-  };
+  const handleMoveUp = (g: Genre) => apiCall("POST", `/api/genres/${g.id}/move/up`);
+  const handleMoveDown = (g: Genre) => apiCall("POST", `/api/genres/${g.id}/move/down`);
 
-  const handleMoveDown = async () => {
-    if (!selectedGenre) return;
-    await apiCall("POST", `/api/genres/${selectedGenre.id}/move/down`);
-  };
-
-  const contextMenuItems = selectedGenre
+  const contextMenuItems = menuTarget
     ? [
-        { label: "名前変更", onClick: handleRename },
-        { label: "概要を編集", onClick: handleEditSummary },
-        { label: "上へ移動", onClick: handleMoveUp },
-        { label: "下へ移動", onClick: handleMoveDown },
-        { label: "削除", onClick: handleDelete },
+        { label: "名前変更", onClick: () => handleRename(menuTarget) },
+        { label: "概要を編集", onClick: () => handleEditSummary(menuTarget) },
+        { label: "上へ移動", onClick: () => handleMoveUp(menuTarget) },
+        { label: "下へ移動", onClick: () => handleMoveDown(menuTarget) },
+        { label: "削除", onClick: () => handleDelete(menuTarget) },
       ]
     : [];
+
+  const openContextMenu = (e: React.MouseEvent, genre: Genre) => {
+    e.preventDefault();
+    setContextMenu({ x: e.clientX, y: e.clientY, genre });
+  };
 
   if (loading) return <p className="text-gray-400">読み込み中...</p>;
   if (error) return <p className="text-red-400">エラー: {error}</p>;
 
   return (
-    <div className="flex flex-col gap-2 mb-4">
+    <div className="flex flex-col gap-2 mb-4 md:mb-0">
+      {/* スマホ: ドロップダウン */}
       <div
-        className="flex flex-row gap-2 items-center"
+        className="flex flex-row gap-2 items-center md:hidden"
         onContextMenu={(e) => {
           if (selectedGenre) {
             e.preventDefault();
-            setContextMenu({ x: e.clientX, y: e.clientY });
+            setContextMenu({ x: e.clientX, y: e.clientY, genre: selectedGenre });
           }
         }}
       >
@@ -172,7 +183,7 @@ export function GenreSelector({
           <option value="">ジャンルを選択</option>
           {genres.map((g) => {
             const n = countIncompleteMissions(g);
-            const label = n > 0 ? `${g.name} · ${n}` : g.name;
+            const label = n > 0 ? g.name + " \u00B7 " + n : g.name;
             return (
               <option key={g.id} value={g.id}>
                 {label}
@@ -187,6 +198,54 @@ export function GenreSelector({
         >
           追加
         </button>
+      </div>
+
+      {/* PC: サイドバー用ジャンル一覧 */}
+      <div className="hidden md:flex md:flex-col md:gap-1">
+        <div className="flex justify-between items-center gap-2 mb-2">
+          <span className="font-semibold text-gray-200">ジャンル</span>
+          <button
+            type="button"
+            onClick={() => setShowAddModal(true)}
+            className="flex-shrink-0 px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-500 active:bg-blue-700"
+          >
+            追加
+          </button>
+        </div>
+        <div className="flex flex-col gap-0.5 overflow-y-auto">
+          {genres.map((g) => {
+            const n = countIncompleteMissions(g);
+            const isSelected = selectedGenre?.id === g.id;
+            return (
+              <button
+                key={g.id}
+                type="button"
+                onClick={() => onSelect?.(g)}
+                onContextMenu={(e) => openContextMenu(e, g)}
+                className={cn(
+                  "text-left px-3 min-h-8 py-1.5 flex flex-col justify-start rounded transition-colors",
+                  isSelected
+                    ? "bg-gray-700 text-gray-100"
+                    : "hover:bg-gray-700/50 text-gray-300"
+                )}
+              >
+                <span className="font-medium flex items-center gap-2">
+                  {g.name}
+                  {n > 0 && (
+                    <span className="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 rounded-full bg-amber-500/20 text-amber-400 text-xs font-semibold">
+                      {n}
+                    </span>
+                  )}
+                </span>
+                {g.summary && (
+                  <span className="text-gray-500 text-xs block truncate mt-0.5">
+                    {g.summary}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <Modal
@@ -246,17 +305,23 @@ export function GenreSelector({
 
       <EditTextModal
         isOpen={showRenameModal}
-        onClose={() => setShowRenameModal(false)}
+        onClose={() => {
+          setShowRenameModal(false);
+          setEditingGenre(null);
+        }}
         title="ジャンル名変更"
-        initialValue={selectedGenre?.name ?? ""}
+        initialValue={(editingGenre ?? selectedGenre)?.name ?? ""}
         placeholder="新しいジャンル名"
         onConfirm={handleRenameConfirm}
       />
       <EditTextModal
         isOpen={showSummaryModal}
-        onClose={() => setShowSummaryModal(false)}
+        onClose={() => {
+          setShowSummaryModal(false);
+          setEditingGenre(null);
+        }}
         title="概要を編集"
-        initialValue={selectedGenre?.summary ?? ""}
+        initialValue={(editingGenre ?? selectedGenre)?.summary ?? ""}
         placeholder="概要を入力"
         multiline
         allowEmpty
