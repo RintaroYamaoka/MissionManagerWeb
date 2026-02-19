@@ -10,7 +10,6 @@ import { EditDateModal } from "./EditDateModal";
 import { AlertModal } from "./AlertModal";
 import { ContextMenu } from "./ContextMenu";
 import type { Genre, Mission } from "@/lib/types";
-import { useLongPressContextMenu } from "@/hooks/useLongPressContextMenu";
 
 function toDateInputValue(v: string | null | undefined): string {
   if (!v) return "";
@@ -97,10 +96,6 @@ export function MissionCard({ mission, genre, onChanged, updateTaskOptimistic }:
   const handleMoveDown = () =>
     apiCall("POST", `/api/missions/${mission.id}/move/down`);
 
-  const contextMenuHandlers = useLongPressContextMenu((x, y) => {
-    setContextMenu({ x, y });
-  });
-
   const handleAddTask = async () => {
     const name = taskAddName.trim();
     if (!name) {
@@ -133,19 +128,22 @@ export function MissionCard({ mission, genre, onChanged, updateTaskOptimistic }:
     }
   };
 
-  const { consumeLongPressClick, ...menuHandlers } = contextMenuHandlers;
+  const openMenuAt = (e: React.MouseEvent) => {
+    setContextMenu({ x: e.clientX, y: e.clientY });
+  };
 
   return (
     <div
-      className="long-press-context border border-gray-700 rounded-lg p-4 bg-gray-800 shadow-sm hover:bg-gray-700/50 active:bg-gray-700/70 cursor-pointer touch-manipulation select-none"
+      className="border border-gray-700 rounded-lg p-4 bg-gray-800 shadow-sm hover:bg-gray-700/50 active:bg-gray-700/70 cursor-pointer touch-manipulation"
       onClick={(e) => {
-        if (consumeLongPressClick()) return;
         if (!(e.target as HTMLElement).closest("button") && !(e.target as HTMLElement).closest("input")) {
           setExpanded(!expanded);
         }
       }}
-      onSelectStart={(e) => e.preventDefault()}
-      {...menuHandlers}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        setContextMenu({ x: e.clientX, y: e.clientY });
+      }}
     >
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-4">
         <div className="flex-1 min-w-0">
@@ -169,6 +167,17 @@ export function MissionCard({ mission, genre, onChanged, updateTaskOptimistic }:
           <span className="text-sm text-gray-400 font-medium flex-shrink-0 w-10 text-right">
             {Math.round(progress * 100)}%
           </span>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              openMenuAt(e);
+            }}
+            className="lg:hidden flex-shrink-0 w-8 h-8 sm:w-6 sm:h-6 flex items-center justify-center rounded text-gray-400 hover:text-gray-200 hover:bg-gray-600/50 active:bg-gray-600 touch-manipulation"
+            aria-label="メニューを開く"
+          >
+            ⋮
+          </button>
           <span className="text-gray-500 flex-shrink-0 text-lg">
             {expanded ? "▲" : "▼"}
           </span>

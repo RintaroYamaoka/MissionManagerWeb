@@ -7,7 +7,6 @@ import { EditDateModal } from "./EditDateModal";
 import { AlertModal } from "./AlertModal";
 import { ContextMenu } from "./ContextMenu";
 import type { Task } from "@/lib/types";
-import { useLongPressContextMenu } from "@/hooks/useLongPressContextMenu";
 
 function toDateInputValue(v: string | null | undefined): string {
   if (!v) return "";
@@ -121,24 +120,19 @@ export function TaskItem({ task, missionId, genreId, onChanged, updateTaskOptimi
   const handleMoveUp = () => apiCall("POST", `/api/tasks/${task.id}/move/up`);
   const handleMoveDown = () => apiCall("POST", `/api/tasks/${task.id}/move/down`);
 
-  const contextMenuHandlers = useLongPressContextMenu((x, y) => {
-    setContextMenu({ x, y });
-  });
-
-  const { consumeLongPressClick, ...handlers } = contextMenuHandlers;
+  const openMenuAt = (e: React.MouseEvent) => {
+    setContextMenu({ x: e.clientX, y: e.clientY });
+  };
 
   return (
     <div
-      className="long-press-context flex flex-col gap-1 py-3 px-3 sm:py-1.5 sm:px-2 rounded hover:bg-gray-700/50 active:bg-gray-700/70 min-h-[44px] touch-manipulation select-none"
+      className="flex flex-col gap-1 py-3 px-3 sm:py-1.5 sm:px-2 rounded hover:bg-gray-700/50 active:bg-gray-700/70 min-h-[44px] touch-manipulation"
       onClick={(e) => e.stopPropagation()}
-      onClickCapture={(e) => {
-        if (consumeLongPressClick()) {
-          e.preventDefault();
-          e.stopPropagation();
-        }
+      onContextMenu={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setContextMenu({ x: e.clientX, y: e.clientY });
       }}
-      onSelectStart={(e) => e.preventDefault()}
-      {...handlers}
     >
       <div className="flex items-center gap-2 min-h-0">
         <input
@@ -152,6 +146,17 @@ export function TaskItem({ task, missionId, genreId, onChanged, updateTaskOptimi
         >
           {task.name}
         </div>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            openMenuAt(e);
+          }}
+          className="lg:hidden flex-shrink-0 w-8 h-8 sm:w-6 sm:h-6 flex items-center justify-center rounded text-gray-400 hover:text-gray-200 hover:bg-gray-600/50 active:bg-gray-600 touch-manipulation"
+          aria-label="メニューを開く"
+        >
+          ⋮
+        </button>
       </div>
       {(task.summary || task.dueDate || displayedCompletedAt) && (
           <div className="mt-0.5 pl-7 sm:pl-6 text-xs space-y-0.5">

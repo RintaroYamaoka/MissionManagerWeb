@@ -7,7 +7,6 @@ import { EditTextModal } from "./EditTextModal";
 import { AlertModal } from "./AlertModal";
 import { ContextMenu } from "./ContextMenu";
 import type { Genre } from "@/lib/types";
-import { useLongPressContextMenu } from "@/hooks/useLongPressContextMenu";
 
 function cn(...classes: (string | undefined)[]) {
   return classes.filter(Boolean).join(" ");
@@ -27,25 +26,28 @@ function GenreListButton({
   countIncomplete: (g: Genre) => number;
 }) {
   const n = countIncomplete(genre);
-  const handlers = useLongPressContextMenu((x, y) => onOpenContextMenu(x, y, genre));
-  const { consumeLongPressClick, ...menuHandlers } = handlers;
+
+  const openMenuAt = (e: React.MouseEvent) => {
+    onOpenContextMenu(e.clientX, e.clientY, genre);
+  };
 
   return (
-    <button
-      type="button"
-      onClick={() => {
-        if (consumeLongPressClick()) return;
-        onSelect();
-      }}
-      onSelectStart={(e) => e.preventDefault()}
-      {...menuHandlers}
-      className={cn(
-        "long-press-context text-left px-3 min-h-8 py-1.5 flex flex-col justify-start rounded transition-colors touch-manipulation select-none",
-        isSelected ? "bg-gray-700 text-gray-100" : "hover:bg-gray-700/50 text-gray-300"
-      )}
-    >
-      <span className="font-medium flex items-center gap-2">
-        {genre.name}
+    <div className="flex items-stretch gap-0.5">
+      <button
+        type="button"
+        onClick={() => onSelect()}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          openMenuAt(e);
+        }}
+        className={cn(
+          "flex-1 text-left px-3 min-h-8 py-1.5 flex flex-col justify-start rounded transition-colors touch-manipulation",
+          isSelected ? "bg-gray-700 text-gray-100" : "hover:bg-gray-700/50 text-gray-300"
+        )}
+      >
+        <span className="font-medium flex items-center gap-2">
+          {genre.name}
         {n > 0 && (
           <span className="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 rounded-full bg-amber-500/20 text-amber-400 text-xs font-semibold">
             {n}
@@ -58,6 +60,15 @@ function GenreListButton({
         </span>
       )}
     </button>
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); openMenuAt(e); }}
+        className="lg:hidden flex-shrink-0 w-8 h-8 flex items-center justify-center rounded text-gray-400 hover:text-gray-200 hover:bg-gray-600/50 active:bg-gray-600 touch-manipulation"
+        aria-label="メニューを開く"
+      >
+        ⋮
+      </button>
+    </div>
   );
 }
 
@@ -207,10 +218,6 @@ export function GenreSelector({
     setContextMenu({ x, y, genre });
   };
 
-  const mobileContextHandlers = useLongPressContextMenu((x, y) => {
-    if (selectedGenre) setContextMenu({ x, y, genre: selectedGenre });
-  });
-
   if (loading) return <p className="text-gray-400">読み込み中...</p>;
   if (error) return <p className="text-red-400">エラー: {error}</p>;
 
@@ -218,8 +225,13 @@ export function GenreSelector({
     <div className="flex flex-col gap-2 mb-4 md:mb-0">
       {/* スマホ: ドロップダウン */}
       <div
-        className="long-press-context flex flex-row gap-2 items-center md:hidden touch-manipulation select-none"
-        {...mobileContextHandlers}
+        className="flex flex-row gap-2 items-center md:hidden touch-manipulation"
+        onContextMenu={(e) => {
+          if (selectedGenre) {
+            e.preventDefault();
+            setContextMenu({ x: e.clientX, y: e.clientY, genre: selectedGenre });
+          }
+        }}
       >
         <select
           className="border border-gray-600 rounded px-3 py-2.5 min-h-[44px] flex-1 min-w-0 bg-gray-800 text-gray-100 touch-manipulation outline-none focus:ring-0 focus:ring-offset-0"
@@ -245,6 +257,19 @@ export function GenreSelector({
             );
           })}
         </select>
+        {selectedGenre && (
+          <button
+            type="button"
+            onClick={(e) => {
+              const rect = (e.target as HTMLElement).getBoundingClientRect();
+              setContextMenu({ x: rect.right - 8, y: rect.bottom + 4, genre: selectedGenre });
+            }}
+            className="flex-shrink-0 w-10 h-10 min-h-[44px] flex items-center justify-center rounded text-gray-400 hover:text-gray-200 hover:bg-gray-600/50 active:bg-gray-600 touch-manipulation"
+            aria-label="メニューを開く"
+          >
+            ⋮
+          </button>
+        )}
         <button
           type="button"
           onClick={() => setShowAddModal(true)}
