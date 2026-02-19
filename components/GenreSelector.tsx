@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { countIncompleteMissions } from "@/lib/types";
 import { Modal } from "./Modal";
 import { EditTextModal } from "./EditTextModal";
+import { AlertModal } from "./AlertModal";
 import { ContextMenu } from "./ContextMenu";
 import type { Genre } from "@/lib/types";
 
@@ -37,6 +38,7 @@ export function GenreSelector({
   const [showRenameModal, setShowRenameModal] = useState(false);
   const [showSummaryModal, setShowSummaryModal] = useState(false);
   const [editingGenre, setEditingGenre] = useState<Genre | null>(null);
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !selectedGenre && genres.length > 0) {
@@ -47,7 +49,7 @@ export function GenreSelector({
   const handleAdd = async () => {
     const name = addName.trim();
     if (!name) {
-      alert("名前を入力してください。");
+      setAlertMessage("名前を入力してください。");
       return;
     }
     try {
@@ -68,7 +70,7 @@ export function GenreSelector({
       await (refetchSilent ?? refetch)();
       onSelect?.(data.genre);
     } catch (e) {
-      alert(e instanceof Error ? e.message : "不明なエラー");
+      setAlertMessage(e instanceof Error ? e.message : "不明なエラー");
     }
   };
 
@@ -91,7 +93,7 @@ export function GenreSelector({
       await (refetchSilent ?? refetch)();
       return true;
     } catch (e) {
-      alert(e instanceof Error ? e.message : "不明なエラー");
+      setAlertMessage(e instanceof Error ? e.message : "不明なエラー");
       return false;
     }
   };
@@ -326,6 +328,11 @@ export function GenreSelector({
         multiline
         allowEmpty
         onConfirm={handleSummaryConfirm}
+      />
+      <AlertModal
+        isOpen={alertMessage !== null}
+        message={alertMessage ?? ""}
+        onClose={() => setAlertMessage(null)}
       />
     </div>
   );

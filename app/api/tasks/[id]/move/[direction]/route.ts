@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { auth } from "@/auth";
+import { sortTasksByDueAndIncomplete } from "@/lib/types";
 
 export async function POST(
   _request: NextRequest,
@@ -28,17 +29,34 @@ export async function POST(
       where: { missionId: task.missionId },
       orderBy: { order: "asc" },
     });
-    const idx = siblings.findIndex((t) => t.id === id);
+    const sorted = sortTasksByDueAndIncomplete(siblings);
+    const idx = sorted.findIndex((t) => t.id === id);
     if (idx < 0) {
       return NextResponse.json({ error: "タスクが見つかりません" }, { status: 404 });
     }
 
     const swapIdx = direction === "up" ? idx - 1 : idx + 1;
-    if (swapIdx < 0 || swapIdx >= siblings.length) {
+    if (swapIdx < 0 || swapIdx >= sorted.length) {
       return NextResponse.json({ error: "これ以上移動できません" }, { status: 400 });
     }
 
-    const [a, b] = [siblings[idx], siblings[swapIdx]];
+    const a = sorted[idx];
+    const b = sorted[swapIdx];
+    if (a.done !== b.done) {
+      return NextResponse.json(
+        { error: "期限が優先されます" },
+        { status: 400 }
+      );
+    }
+    const aDue = a.dueDate ? new Date(a.dueDate).getTime() : Infinity;
+    const bDue = b.dueDate ? new Date(b.dueDate).getTime() : Infinity;
+    if (aDue !== bDue) {
+      return NextResponse.json(
+        { error: "期限が優先されます" },
+        { status: 400 }
+      );
+    }
+
     await prisma.$transaction([
       prisma.task.update({ where: { id: a.id }, data: { order: b.order } }),
       prisma.task.update({ where: { id: b.id }, data: { order: a.order } }),

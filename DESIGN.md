@@ -103,11 +103,9 @@ created_at TIMESTAMPTZ DEFAULT now()
 | GET | `/api/missions/[id]/tasks` | ミッションのタスク一覧 |
 | POST | `/api/missions/[id]/tasks` | タスク追加 |
 | PATCH | `/api/tasks/[id]` | タスク更新（完了含む） |
-| DELETE | `/api/tasks/[id]` | タスク削除 |
 | POST | `/api/tasks/[id]/move/up` | タスクを上へ |
 | POST | `/api/tasks/[id]/move/down` | タスクを下へ |
-
-順序変更は専用エンドポイント（`/move/up`, `/move/down`）で実装。
+| DELETE | `/api/tasks/[id]` | タスク削除 |
 
 ---
 

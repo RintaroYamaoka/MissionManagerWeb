@@ -4,7 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 export interface ContextMenuItem {
   label: string;
-  onClick: () => void;
+  onClick: () => void | Promise<void>;
 }
 
 interface ContextMenuProps {
@@ -58,10 +58,10 @@ export function ContextMenu({ x, y, items, onClose }: ContextMenuProps) {
           key={item.label}
           type="button"
           className="w-full px-4 py-3 min-h-[44px] text-left text-sm hover:bg-gray-700 active:bg-gray-600 touch-manipulation flex items-center"
-          onClick={(e) => {
+          onClick={async (e) => {
             e.stopPropagation();
+            await item.onClick();
             onClose();
-            item.onClick();
           }}
         >
           {item.label}

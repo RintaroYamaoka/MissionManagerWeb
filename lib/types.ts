@@ -47,7 +47,7 @@ export function formatDateJp(dateStr: string | null | undefined): string {
   return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
 }
 
-/** 期限が早く・未完了のミッションを上に */
+/** 期限が早く・未完了のミッションを上に。同条件は order でタイブレーク */
 export function sortMissionsByDueAndIncomplete(missions: Mission[]): Mission[] {
   return [...missions].sort((a, b) => {
     const aIncomplete = missionProgress(a) < 1;
@@ -55,16 +55,18 @@ export function sortMissionsByDueAndIncomplete(missions: Mission[]): Mission[] {
     if (aIncomplete !== bIncomplete) return aIncomplete ? -1 : 1;
     const aDue = a.dueDate ? new Date(a.dueDate).getTime() : Infinity;
     const bDue = b.dueDate ? new Date(b.dueDate).getTime() : Infinity;
-    return aDue - bDue;
+    if (aDue !== bDue) return aDue - bDue;
+    return a.order - b.order;
   });
 }
 
-/** 期限が早く・未完了のタスクを上に */
+/** 期限が早く・未完了のタスクを上に。同条件は order でタイブレーク */
 export function sortTasksByDueAndIncomplete(tasks: Task[]): Task[] {
   return [...tasks].sort((a, b) => {
     if (a.done !== b.done) return a.done ? 1 : -1;
     const aDue = a.dueDate ? new Date(a.dueDate).getTime() : Infinity;
     const bDue = b.dueDate ? new Date(b.dueDate).getTime() : Infinity;
-    return aDue - bDue;
+    if (aDue !== bDue) return aDue - bDue;
+    return a.order - b.order;
   });
 }

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { formatDateJp } from "@/lib/types";
 import { EditTextModal } from "./EditTextModal";
 import { EditDateModal } from "./EditDateModal";
+import { AlertModal } from "./AlertModal";
 import { ContextMenu } from "./ContextMenu";
 import type { Task } from "@/lib/types";
 
@@ -26,6 +27,7 @@ export function TaskItem({ task, missionId, genreId, onChanged, updateTaskOptimi
   const [showRenameModal, setShowRenameModal] = useState(false);
   const [showSummaryModal, setShowSummaryModal] = useState(false);
   const [showDueModal, setShowDueModal] = useState(false);
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [optimisticDone, setOptimisticDone] = useState<boolean | null>(null);
 
   const displayedDone = optimisticDone ?? task.done;
@@ -87,7 +89,7 @@ export function TaskItem({ task, missionId, genreId, onChanged, updateTaskOptimi
       onChanged?.();
       return true;
     } catch (e) {
-      alert(e instanceof Error ? e.message : "不明なエラー");
+      setAlertMessage(e instanceof Error ? e.message : "不明なエラー");
       return false;
     }
   };
@@ -203,6 +205,11 @@ export function TaskItem({ task, missionId, genreId, onChanged, updateTaskOptimi
         title="期限を編集"
         initialValue={toDateInputValue(task.dueDate)}
         onConfirm={handleDueConfirm}
+      />
+      <AlertModal
+        isOpen={alertMessage !== null}
+        message={alertMessage ?? ""}
+        onClose={() => setAlertMessage(null)}
       />
     </div>
   );

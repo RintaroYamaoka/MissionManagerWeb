@@ -7,6 +7,7 @@ import { TaskItem } from "./TaskItem";
 import { Modal } from "./Modal";
 import { EditTextModal } from "./EditTextModal";
 import { EditDateModal } from "./EditDateModal";
+import { AlertModal } from "./AlertModal";
 import { ContextMenu } from "./ContextMenu";
 import type { Genre, Mission } from "@/lib/types";
 
@@ -33,6 +34,7 @@ export function MissionCard({ mission, genre, onChanged, updateTaskOptimistic }:
   const [showRenameModal, setShowRenameModal] = useState(false);
   const [showSummaryModal, setShowSummaryModal] = useState(false);
   const [showDueModal, setShowDueModal] = useState(false);
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
 
   const tasks = sortTasksByDueAndIncomplete(mission.tasks ?? []);
   const progress = missionProgress(mission);
@@ -58,7 +60,7 @@ export function MissionCard({ mission, genre, onChanged, updateTaskOptimistic }:
       onChanged?.();
       return true;
     } catch (e) {
-      alert(e instanceof Error ? e.message : "不明なエラー");
+      setAlertMessage(e instanceof Error ? e.message : "不明なエラー");
       return false;
     }
   };
@@ -122,7 +124,7 @@ export function MissionCard({ mission, genre, onChanged, updateTaskOptimistic }:
       setShowTaskAddModal(false);
       onChanged?.();
     } catch (e) {
-      alert(e instanceof Error ? e.message : "不明なエラー");
+      setAlertMessage(e instanceof Error ? e.message : "不明なエラー");
     }
   };
 
@@ -302,6 +304,11 @@ export function MissionCard({ mission, genre, onChanged, updateTaskOptimistic }:
         title="期限を編集"
         initialValue={toDateInputValue(mission.dueDate)}
         onConfirm={handleDueConfirm}
+      />
+      <AlertModal
+        isOpen={alertMessage !== null}
+        message={alertMessage ?? ""}
+        onClose={() => setAlertMessage(null)}
       />
     </div>
   );
