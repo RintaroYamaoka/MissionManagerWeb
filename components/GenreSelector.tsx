@@ -7,9 +7,57 @@ import { EditTextModal } from "./EditTextModal";
 import { AlertModal } from "./AlertModal";
 import { ContextMenu } from "./ContextMenu";
 import type { Genre } from "@/lib/types";
+import { useLongPressContextMenu } from "@/hooks/useLongPressContextMenu";
 
 function cn(...classes: (string | undefined)[]) {
   return classes.filter(Boolean).join(" ");
+}
+
+function GenreListButton({
+  genre,
+  isSelected,
+  onSelect,
+  onOpenContextMenu,
+  countIncomplete,
+}: {
+  genre: Genre;
+  isSelected: boolean;
+  onSelect: () => void;
+  onOpenContextMenu: (x: number, y: number, g: Genre) => void;
+  countIncomplete: (g: Genre) => number;
+}) {
+  const n = countIncomplete(genre);
+  const handlers = useLongPressContextMenu((x, y) => onOpenContextMenu(x, y, genre));
+  const { consumeLongPressClick, ...menuHandlers } = handlers;
+
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        if (consumeLongPressClick()) return;
+        onSelect();
+      }}
+      {...menuHandlers}
+      className={cn(
+        "text-left px-3 min-h-8 py-1.5 flex flex-col justify-start rounded transition-colors",
+        isSelected ? "bg-gray-700 text-gray-100" : "hover:bg-gray-700/50 text-gray-300"
+      )}
+    >
+      <span className="font-medium flex items-center gap-2">
+        {genre.name}
+        {n > 0 && (
+          <span className="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 rounded-full bg-amber-500/20 text-amber-400 text-xs font-semibold">
+            {n}
+          </span>
+        )}
+      </span>
+      {genre.summary && (
+        <span className="text-gray-400 text-xs block truncate mt-0.5">
+          {genre.summary}
+        </span>
+      )}
+    </button>
+  );
 }
 
 interface GenreSelectorProps {
@@ -154,6 +202,14 @@ export function GenreSelector({
     setContextMenu({ x: e.clientX, y: e.clientY, genre });
   };
 
+  const openContextMenuAt = (x: number, y: number, genre: Genre) => {
+    setContextMenu({ x, y, genre });
+  };
+
+  const mobileContextHandlers = useLongPressContextMenu((x, y) => {
+    if (selectedGenre) setContextMenu({ x, y, genre: selectedGenre });
+  });
+
   if (loading) return <p className="text-gray-400">読み込み中...</p>;
   if (error) return <p className="text-red-400">エラー: {error}</p>;
 
@@ -162,12 +218,7 @@ export function GenreSelector({
       {/* スマホ: ドロップダウン */}
       <div
         className="flex flex-row gap-2 items-center md:hidden"
-        onContextMenu={(e) => {
-          if (selectedGenre) {
-            e.preventDefault();
-            setContextMenu({ x: e.clientX, y: e.clientY, genre: selectedGenre });
-          }
-        }}
+        {...mobileContextHandlers}
       >
         <select
           className="border border-gray-600 rounded px-3 py-2.5 min-h-[44px] flex-1 min-w-0 bg-gray-800 text-gray-100 touch-manipulation outline-none focus:ring-0 focus:ring-offset-0"
@@ -215,38 +266,16 @@ export function GenreSelector({
           </button>
         </div>
         <div className="flex flex-col gap-0.5 overflow-y-auto">
-          {genres.map((g) => {
-            const n = countIncompleteMissions(g);
-            const isSelected = selectedGenre?.id === g.id;
-            return (
-              <button
-                key={g.id}
-                type="button"
-                onClick={() => onSelect?.(g)}
-                onContextMenu={(e) => openContextMenu(e, g)}
-                className={cn(
-                  "text-left px-3 min-h-8 py-1.5 flex flex-col justify-start rounded transition-colors",
-                  isSelected
-                    ? "bg-gray-700 text-gray-100"
-                    : "hover:bg-gray-700/50 text-gray-300"
-                )}
-              >
-                <span className="font-medium flex items-center gap-2">
-                  {g.name}
-                  {n > 0 && (
-                    <span className="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 rounded-full bg-amber-500/20 text-amber-400 text-xs font-semibold">
-                      {n}
-                    </span>
-                  )}
-                </span>
-                {g.summary && (
-                  <span className="text-gray-400 text-xs block truncate mt-0.5">
-                    {g.summary}
-                  </span>
-                )}
-              </button>
-            );
-          })}
+          {genres.map((g) => (
+            <GenreListButton
+              key={g.id}
+              genre={g}
+              isSelected={selectedGenre?.id === g.id}
+              onSelect={() => onSelect?.(g)}
+              onOpenContextMenu={openContextMenuAt}
+              countIncomplete={countIncompleteMissions}
+            />
+          ))}
         </div>
       </div>
 
