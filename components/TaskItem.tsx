@@ -122,7 +122,7 @@ export function TaskItem({ task, missionId, genreId, onChanged, updateTaskOptimi
 
   return (
     <div
-      className="flex gap-2 py-3 px-3 sm:py-1.5 sm:px-2 rounded hover:bg-gray-700/50 active:bg-gray-700/70 min-h-[44px] touch-manipulation"
+      className="flex flex-col gap-1 py-3 px-3 sm:py-1.5 sm:px-2 rounded hover:bg-gray-700/50 active:bg-gray-700/70 min-h-[44px] touch-manipulation"
       onClick={(e) => e.stopPropagation()}
       onContextMenu={(e) => {
         e.preventDefault();
@@ -130,20 +130,21 @@ export function TaskItem({ task, missionId, genreId, onChanged, updateTaskOptimi
         setContextMenu({ x: e.clientX, y: e.clientY });
       }}
     >
-      <input
-        type="checkbox"
-        checked={displayedDone}
-        onChange={handleToggle}
-        className="rounded cursor-pointer w-5 h-5 sm:w-4 sm:h-4 flex-shrink-0 mt-0.5 sm:mt-0"
-      />
-      <div className="flex-1 min-w-0">
+      <div className="flex items-center gap-2 min-h-0">
+        <input
+          type="checkbox"
+          checked={displayedDone}
+          onChange={handleToggle}
+          className="rounded cursor-pointer w-5 h-5 sm:w-4 sm:h-4 flex-shrink-0"
+        />
         <div
-          className={`break-words ${displayedDone ? "line-through text-gray-500" : "text-gray-200"}`}
+          className={`flex-1 min-w-0 break-words leading-snug ${displayedDone ? "line-through text-gray-500" : "text-gray-200"}`}
         >
           {task.name}
         </div>
-        {(task.summary || task.dueDate || displayedCompletedAt) && (
-          <div className="mt-1 text-xs space-y-0.5">
+      </div>
+      {(task.summary || task.dueDate || displayedCompletedAt) && (
+          <div className="mt-0.5 pl-7 sm:pl-6 text-xs space-y-0.5">
             {task.summary && (
               <p className="text-gray-400">{task.summary}</p>
             )}
@@ -163,7 +164,6 @@ export function TaskItem({ task, missionId, genreId, onChanged, updateTaskOptimi
             )}
           </div>
         )}
-      </div>
 
       {contextMenu && (
         <ContextMenu
