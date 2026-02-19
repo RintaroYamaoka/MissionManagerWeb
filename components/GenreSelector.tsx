@@ -148,7 +148,7 @@ export function GenreSelector({
   return (
     <div className="flex flex-col gap-2 mb-4">
       <div
-        className="flex flex-col sm:flex-row gap-2 sm:items-center"
+        className="flex flex-row gap-2 items-center"
         onContextMenu={(e) => {
           if (selectedGenre) {
             e.preventDefault();
@@ -157,7 +157,7 @@ export function GenreSelector({
         }}
       >
         <select
-          className="border border-gray-600 rounded px-3 py-2.5 min-h-[44px] flex-1 w-full bg-gray-800 text-gray-100 touch-manipulation"
+          className="border border-gray-600 rounded px-3 py-2.5 min-h-[44px] flex-1 min-w-0 bg-gray-800 text-gray-100 touch-manipulation outline-none focus:ring-0 focus:ring-offset-0"
           value={selectedGenre?.id ?? ""}
           onChange={(e) => {
             const id = e.target.value;
@@ -183,16 +183,11 @@ export function GenreSelector({
         <button
           type="button"
           onClick={() => setShowAddModal(true)}
-          className="px-4 py-2.5 min-h-[44px] bg-blue-600 text-white rounded hover:bg-blue-500 active:bg-blue-700 touch-manipulation"
+          className="px-4 py-2.5 min-h-[44px] flex-shrink-0 bg-blue-600 text-white rounded hover:bg-blue-500 active:bg-blue-700 touch-manipulation"
         >
           追加
         </button>
       </div>
-      {selectedGenre?.summary && (
-        <p className="text-gray-400 text-sm">
-          {selectedGenre.summary}
-        </p>
-      )}
 
       <Modal
         isOpen={showAddModal}

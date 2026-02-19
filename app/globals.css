@@ -8,9 +8,9 @@
     scrollbar-width: thin;
     scrollbar-color: theme("colors.gray.600") theme("colors.gray.800");
   }
-  /* スマホ: タップホールドでコンテキストメニューが出るように */
+  /* スマホ: タップ時のハイライトを無効化 */
   @media (hover: none) and (pointer: coarse) {
-    button, [role="button"], a {
+    button, [role="button"], a, select, input {
       -webkit-tap-highlight-color: transparent;
     }
   }

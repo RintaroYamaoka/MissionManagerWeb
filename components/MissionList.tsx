@@ -56,8 +56,13 @@ export function MissionList({ selectedGenre, refetch, refetchSilent, updateTaskO
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
-      <h2 className="text-lg font-semibold mb-4 text-gray-100">
-        {selectedGenre ? selectedGenre.name : "ジャンルを選択してください"}
+      <h2 className="text-lg font-semibold mb-4 text-gray-100 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+        <span>{selectedGenre ? selectedGenre.name : "ジャンルを選択してください"}</span>
+        {selectedGenre?.summary && (
+          <span className="text-gray-400 text-sm font-normal">
+            {selectedGenre.summary}
+          </span>
+        )}
       </h2>
 
       <div className="flex-1 overflow-y-auto space-y-4">
