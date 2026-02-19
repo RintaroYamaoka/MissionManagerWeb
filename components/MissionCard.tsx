@@ -1,0 +1,286 @@
+"use client";
+
+import { useState } from "react";
+import { missionProgress, formatDateJp, sortTasksByDueAndIncomplete } from "@/lib/types";
+import { TaskItem } from "./TaskItem";
+import { Modal } from "./Modal";
+import { EditTextModal } from "./EditTextModal";
+import { EditDateModal } from "./EditDateModal";
+import { ContextMenu } from "./ContextMenu";
+import type { Genre, Mission } from "@/lib/types";
+
+function toDateInputValue(v: string | null | undefined): string {
+  if (!v) return "";
+  const m = v.match(/^(\d{4}-\d{2}-\d{2})/);
+  return m ? m[1] : "";
+}
+
+interface MissionCardProps {
+  mission: Mission;
+  genre: Genre;
+  onChanged?: () => void;
+}
+
+export function MissionCard({ mission, genre, onChanged }: MissionCardProps) {
+  const [expanded, setExpanded] = useState(false);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
+  const [showTaskAddModal, setShowTaskAddModal] = useState(false);
+  const [taskAddName, setTaskAddName] = useState("");
+  const [taskAddDue, setTaskAddDue] = useState("");
+  const [showRenameModal, setShowRenameModal] = useState(false);
+  const [showSummaryModal, setShowSummaryModal] = useState(false);
+  const [showDueModal, setShowDueModal] = useState(false);
+
+  const tasks = sortTasksByDueAndIncomplete(mission.tasks ?? []);
+  const progress = missionProgress(mission);
+  const dueDate = mission.dueDate;
+  const completedAt = mission.completedAt;
+
+  const apiCall = async (
+    method: string,
+    url: string,
+    body?: object
+  ): Promise<boolean> => {
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: body ? { "Content-Type": "application/json" } : undefined,
+        body: body ? JSON.stringify(body) : undefined,
+        credentials: "same-origin",
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error ?? "操作に失敗しました");
+      }
+      onChanged?.();
+      return true;
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "不明なエラー");
+      return false;
+    }
+  };
+
+  const handleRename = () => setShowRenameModal(true);
+  const handleRenameConfirm = async (name: string) => {
+    await apiCall("PATCH", `/api/missions/${mission.id}`, { name });
+    setShowRenameModal(false);
+  };
+
+  const handleEditSummary = () => setShowSummaryModal(true);
+  const handleSummaryConfirm = async (summary: string) => {
+    await apiCall("PATCH", `/api/missions/${mission.id}`, {
+      summary: summary || null,
+    });
+    setShowSummaryModal(false);
+  };
+
+  const handleEditDue = () => setShowDueModal(true);
+  const handleDueConfirm = async (due: string | null) => {
+    await apiCall("PATCH", `/api/missions/${mission.id}`, {
+      due_date: due,
+    });
+    setShowDueModal(false);
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm(`ミッション「${mission.name}」を削除しますか？`)) return;
+    await apiCall("DELETE", `/api/missions/${mission.id}`);
+  };
+
+  const handleMoveUp = () => apiCall("POST", `/api/missions/${mission.id}/move/up`);
+  const handleMoveDown = () =>
+    apiCall("POST", `/api/missions/${mission.id}/move/down`);
+
+  const handleAddTask = async () => {
+    const name = taskAddName.trim();
+    if (!name) {
+      alert("名前を入力してください。");
+      return;
+    }
+    try {
+      const res = await fetch(`/api/missions/${mission.id}/tasks`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({
+          name,
+          due_date:
+            taskAddDue && /^\d{4}-\d{2}-\d{2}$/.test(taskAddDue) ? taskAddDue : null,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error ?? "追加に失敗しました");
+      }
+      setTaskAddName("");
+      setTaskAddDue("");
+      setShowTaskAddModal(false);
+      onChanged?.();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "不明なエラー");
+    }
+  };
+
+  return (
+    <div
+      className="border border-gray-700 rounded-lg p-4 bg-gray-800 shadow-sm hover:bg-gray-700/50 cursor-pointer"
+      onClick={(e) => !(e.target as HTMLElement).closest("button") && !(e.target as HTMLElement).closest("input") && setExpanded(!expanded)}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        setContextMenu({ x: e.clientX, y: e.clientY });
+      }}
+    >
+      <div className="flex justify-between items-start gap-4">
+        <div className="flex-1 min-w-0">
+          <h3 className="font-medium">{mission.name}</h3>
+          <div className="flex gap-4 mt-1 text-sm">
+            <span className="text-blue-400 font-medium min-w-[9rem]">
+              期限: {dueDate ? formatDateJp(dueDate) : "未設定"}
+            </span>
+            <span className="text-emerald-400 font-medium min-w-[9rem]">
+              完了: {progress >= 1 && completedAt ? formatDateJp(completedAt) : "-"}
+            </span>
+          </div>
+        </div>
+        <div className="flex-[2] min-w-[6rem]">
+          <div className="h-2 bg-gray-700 rounded overflow-hidden">
+            <div
+              className="h-full bg-blue-500 transition-all"
+              style={{ width: `${progress * 100}%` }}
+            />
+          </div>
+          <div className="text-sm text-gray-400 text-right mt-1 font-medium">
+            {Math.round(progress * 100)}%
+          </div>
+        </div>
+        <span className="text-gray-500 flex-shrink-0">
+          {expanded ? "▲" : "▼"}
+        </span>
+      </div>
+
+      {expanded && (
+        <div className="mt-4 pt-4 border-t border-gray-700 space-y-2" onClick={(e) => e.stopPropagation()}>
+          {mission.summary && (
+            <p className="text-gray-400 text-sm">{mission.summary}</p>
+          )}
+          {tasks.map((t) => (
+            <TaskItem
+              key={t.id}
+              task={t}
+              missionId={mission.id}
+              onChanged={onChanged}
+            />
+          ))}
+          <div className="flex justify-end pt-2">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowTaskAddModal(true);
+              }}
+              className="px-3 py-1.5 text-sm border border-gray-600 rounded hover:bg-gray-700 text-gray-200"
+            >
+              タスク追加
+            </button>
+          </div>
+        </div>
+      )}
+
+      <Modal
+        isOpen={showTaskAddModal}
+        onClose={() => setShowTaskAddModal(false)}
+        title="タスク追加"
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-200">名前:</label>
+            <input
+              type="text"
+              value={taskAddName}
+              onChange={(e) => setTaskAddName(e.target.value)}
+              placeholder="例: API設計"
+              className="w-full border border-gray-600 rounded px-3 py-2 bg-gray-800 text-gray-100 placeholder-gray-500"
+              autoFocus
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-200">期限:</label>
+            <div className="flex gap-2">
+              <input
+                type="date"
+                value={taskAddDue}
+                onChange={(e) => setTaskAddDue(e.target.value)}
+                className="border border-gray-600 rounded px-3 py-2 bg-gray-800 text-gray-100"
+              />
+              <button
+                type="button"
+                onClick={() => setTaskAddDue("")}
+                className="px-3 py-2 border border-gray-600 rounded hover:bg-gray-700 text-gray-200"
+              >
+                解除
+              </button>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setShowTaskAddModal(false)}
+              className="px-4 py-2 border border-gray-600 rounded hover:bg-gray-700 text-gray-200"
+            >
+              キャンセル
+            </button>
+            <button
+              type="button"
+              onClick={handleAddTask}
+              className="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-500"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          items={[
+            { label: "名前変更", onClick: handleRename },
+            { label: "概要を編集", onClick: handleEditSummary },
+            { label: "期限を編集", onClick: handleEditDue },
+            { label: "上へ移動", onClick: handleMoveUp },
+            { label: "下へ移動", onClick: handleMoveDown },
+            { label: "削除", onClick: handleDelete },
+          ]}
+          onClose={() => setContextMenu(null)}
+        />
+      )}
+
+      <EditTextModal
+        isOpen={showRenameModal}
+        onClose={() => setShowRenameModal(false)}
+        title="ミッション名変更"
+        initialValue={mission.name}
+        placeholder="ミッション名"
+        onConfirm={handleRenameConfirm}
+      />
+      <EditTextModal
+        isOpen={showSummaryModal}
+        onClose={() => setShowSummaryModal(false)}
+        title="概要を編集"
+        initialValue={mission.summary ?? ""}
+        placeholder="概要を入力"
+        multiline
+        allowEmpty
+        onConfirm={handleSummaryConfirm}
+      />
+      <EditDateModal
+        isOpen={showDueModal}
+        onClose={() => setShowDueModal(false)}
+        title="期限を編集"
+        initialValue={toDateInputValue(mission.dueDate)}
+        onConfirm={handleDueConfirm}
+      />
+    </div>
+  );
+}

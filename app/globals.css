@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* ダークテーマ用のスクロールバー */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: theme("colors.gray.600") theme("colors.gray.800");
+  }
+}
