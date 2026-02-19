@@ -1,40 +1,69 @@
-# MissionManagerWeb
+# Mission Manager Web
 
-ジャンル・ミッション・タスクの3階層でタスクを管理するWebアプリケーション。  
-デスクトップ版 [MissionManager](https://github.com/yourusername/MissionManager) のWeb版として開発しています。
+<p align="center">
+  <strong>ジャンル × ミッション × タスク</strong> — 3階層で管理するタスク管理Webアプリケーション
+</p>
+
+<p align="center">
+  <a href="#技術スタック">技術スタック</a> •
+  <a href="#機能">機能</a> •
+  <a href="#セットアップ">セットアップ</a>
+</p>
+
+---
+
+## 概要
+
+**Mission Manager Web** は、プロジェクトを「ジャンル → ミッション → タスク」の3階層で整理し、進捗を可視化しながら管理できるWebアプリです。デスクトップ版 [MissionManager](https://github.com/yourusername/MissionManager) のWeb版として開発しています。
+
+### こんな方に向いています
+
+- 複数プロジェクト（学習、仕事、趣味など）を一括管理したい
+- 期限に応じた自動並び替えで、今やるべきことが一目でわかるようにしたい
+- ミッション単位の進捗をプログレスバーで確認したい
+
+---
 
 ## 技術スタック
 
-- **フロントエンド**: Next.js 14 (App Router), React 18, Tailwind CSS
-- **バックエンド**: Next.js API Routes
-- **データベース**: PostgreSQL (Neon)
-- **ORM**: Prisma
-- **認証**: Auth.js (NextAuth v5) - メール・パスワード認証
+| カテゴリ | 技術 |
+|----------|------|
+| **フロントエンド** | Next.js 14 (App Router), React 18, Tailwind CSS, Framer Motion |
+| **バックエンド** | Next.js API Routes |
+| **データベース** | PostgreSQL (Neon) |
+| **ORM** | Prisma |
+| **認証** | Auth.js (NextAuth v5) — メール・パスワード認証 |
+
+---
 
 ## 機能
 
-- ジャンル・ミッション・タスクの CRUD
-- 進捗バーによるミッション完了率の可視化
-- 期限の設定・表示
-- 並び替え（期限が早く・未完了のものを上に表示）
-- 右クリックメニュー（名前変更、期限編集、上へ/下へ移動、削除）
+- **3階層管理** — ジャンル / ミッション / タスクの CRUD
+- **概要（summary）** — 各階層に説明文を追加可能
+- **進捗バー** — ミッション内タスクの完了率をリアルタイム表示
+- **期限管理** — タスク・ミッションに期限を設定し、期限が近い・未完了のものが上に自動表示
+- **楽観的更新** — チェックボックス操作後、サーバー待ちなしで即時UI更新
+- **右クリックメニュー** — 名前変更、概要編集、期限編集、並び替え、削除
+- **レスポンシブ** — PC・スマホに対応
+
+---
 
 ## セットアップ
 
 ### 必要要件
 
 - Node.js 18+
-- PostgreSQL（Neon 推奨）
+- PostgreSQL（[Neon](https://neon.tech) 推奨）
 
-### 1. リポジトリのクローン・依存関係インストール
+### 1. クローン & インストール
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/yourusername/MissionManagerWeb.git
 cd MissionManagerWeb
 npm install
 ```
 
-### 2. 環境変数の設定
+### 2. 環境変数
 
 `.env.example` をコピーして `.env` を作成し、値を設定してください。
 
@@ -46,24 +75,24 @@ cp .env.example .env
 |--------|------|
 | `DATABASE_URL` | プール接続URL（Neon の Connection string） |
 | `DIRECT_URL` | 直接接続URL（マイグレーション用） |
-| `AUTH_SECRET` | `npx auth secret` または `openssl rand -base64 32` で生成 |
+| `AUTH_SECRET` | `npx auth secret` で生成 |
 
-### 3. データベースの初期化
+### 3. データベース初期化
 
 ```bash
 npx prisma generate
 npx prisma db push
-# またはマイグレーションを使用する場合
-# npx prisma migrate dev
 ```
 
-### 4. 開発サーバーの起動
+### 4. 起動
 
 ```bash
 npm run dev
 ```
 
-http://localhost:3000 でアプリにアクセスできます。
+→ http://localhost:3000 でアクセス
+
+---
 
 ## スクリプト
 
@@ -77,44 +106,25 @@ http://localhost:3000 でアプリにアクセスできます。
 | `npm run db:push` | スキーマをDBに反映 |
 | `npm run db:studio` | Prisma Studio 起動 |
 
+---
+
 ## ディレクトリ構造
 
 ```
 MissionManagerWeb/
-├── app/                    # Next.js App Router
-│   ├── api/                # API ルート
-│   │   ├── auth/           # 認証（NextAuth, 新規登録）
-│   │   ├── genres/        # ジャンル CRUD
-│   │   ├── missions/      # ミッション CRUD
-│   │   └── tasks/         # タスク CRUD
-│   ├── login/             # ログインページ
-│   ├── register/           # 新規登録ページ
-│   ├── layout.tsx
-│   └── page.tsx
-├── components/             # React コンポーネント
-│   ├── Header.tsx         # ヘッダー（アカウント表示・ログアウト）
-│   ├── PageContent.tsx    # メインコンテンツ
-│   ├── GenreSelector.tsx  # ジャンル選択
-│   ├── MissionList.tsx    # ミッション一覧
-│   ├── MissionCard.tsx    # ミッションカード
-│   ├── TaskItem.tsx       # タスク項目
-│   ├── Modal.tsx          # モーダルベース
-│   ├── EditTextModal.tsx  # テキスト編集モーダル
-│   ├── EditDateModal.tsx  # 日付編集モーダル
-│   ├── ContextMenu.tsx    # 右クリックメニュー
-│   └── Providers.tsx      # SessionProvider 等
-├── hooks/
-│   └── useGenres.ts       # ジャンル・ミッション取得フック
-├── lib/
-│   ├── db.ts              # Prisma クライアント
-│   └── types.ts           # 型定義・ユーティリティ
-├── prisma/
-│   ├── schema.prisma      # DB スキーマ
-│   └── migrations/        # マイグレーション
-├── auth.ts                # Auth.js 設定
-├── auth.config.ts         # Auth ミドルウェア設定
-└── middleware.ts          # Next.js ミドルウェア（認証ガード）
+├── app/
+│   ├── api/           # 認証・ジャンル・ミッション・タスクAPI
+│   ├── login/         # ログイン
+│   ├── register/      # 新規登録
+│   └── page.tsx       # メインページ
+├── components/        # ヘッダー、ジャンル選択、ミッション一覧、タスク、モーダル等
+├── hooks/             # useGenres（楽観的更新含む）
+├── lib/               # Prisma, 型定義
+├── prisma/            # スキーマ・マイグレーション
+└── auth.ts            # Auth.js 設定
 ```
+
+---
 
 ## ライセンス
 
