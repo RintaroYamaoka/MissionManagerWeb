@@ -137,7 +137,7 @@ export function MissionCard({ mission, genre, onChanged, updateTaskOptimistic }:
 
   return (
     <div
-      className="border border-gray-700 rounded-lg p-4 bg-gray-800 shadow-sm hover:bg-gray-700/50 active:bg-gray-700/70 cursor-pointer touch-manipulation"
+      className="border border-gray-700 rounded-lg p-4 bg-gray-800 shadow-sm hover:bg-gray-700/50 active:bg-gray-700/70 cursor-pointer touch-manipulation select-none"
       onClick={(e) => {
         if (consumeLongPressClick()) return;
         if (!(e.target as HTMLElement).closest("button") && !(e.target as HTMLElement).closest("input")) {

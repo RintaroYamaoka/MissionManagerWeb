@@ -39,7 +39,7 @@ function GenreListButton({
       }}
       {...menuHandlers}
       className={cn(
-        "text-left px-3 min-h-8 py-1.5 flex flex-col justify-start rounded transition-colors",
+        "text-left px-3 min-h-8 py-1.5 flex flex-col justify-start rounded transition-colors touch-manipulation select-none",
         isSelected ? "bg-gray-700 text-gray-100" : "hover:bg-gray-700/50 text-gray-300"
       )}
     >
@@ -217,7 +217,7 @@ export function GenreSelector({
     <div className="flex flex-col gap-2 mb-4 md:mb-0">
       {/* スマホ: ドロップダウン */}
       <div
-        className="flex flex-row gap-2 items-center md:hidden"
+        className="flex flex-row gap-2 items-center md:hidden touch-manipulation select-none"
         {...mobileContextHandlers}
       >
         <select
