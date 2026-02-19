@@ -56,14 +56,24 @@ export function MissionList({ selectedGenre, refetch, refetchSilent, updateTaskO
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
-      <h2 className="text-lg font-semibold mb-4 text-gray-100 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-        <span>{selectedGenre ? selectedGenre.name : "ジャンルを選択してください"}</span>
-        {selectedGenre?.summary && (
-          <span className="text-gray-400 text-sm font-normal">
-            {selectedGenre.summary}
-          </span>
-        )}
-      </h2>
+      <div className="flex flex-row items-center gap-3 mb-4">
+        <h2 className="text-lg font-semibold text-gray-100 flex-1 min-w-0 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+          <span>{selectedGenre ? selectedGenre.name : "ジャンルを選択してください"}</span>
+          {selectedGenre?.summary && (
+            <span className="text-gray-300 text-sm font-normal">
+              {selectedGenre.summary}
+            </span>
+          )}
+        </h2>
+        <button
+          type="button"
+          onClick={() => selectedGenre && setShowAddModal(true)}
+          disabled={!selectedGenre}
+          className="flex-shrink-0 px-3 py-1.5 text-sm bg-emerald-600 text-white rounded hover:bg-emerald-500 active:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+        >
+          ミッション追加
+        </button>
+      </div>
 
       <div className="flex-1 overflow-y-auto space-y-4">
         {missions.map((m) => (
@@ -80,17 +90,6 @@ export function MissionList({ selectedGenre, refetch, refetchSilent, updateTaskO
           />
           </motion.div>
         ))}
-      </div>
-
-      <div className="mt-4 pb-2 flex justify-end">
-        <button
-          type="button"
-          onClick={() => selectedGenre && setShowAddModal(true)}
-          disabled={!selectedGenre}
-          className="w-full sm:w-auto px-4 py-2.5 min-h-[44px] bg-emerald-600 text-white rounded-md hover:bg-emerald-500 active:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
-        >
-          ミッション追加
-        </button>
       </div>
 
       <Modal

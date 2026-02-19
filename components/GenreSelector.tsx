@@ -238,7 +238,7 @@ export function GenreSelector({
                   )}
                 </span>
                 {g.summary && (
-                  <span className="text-gray-500 text-xs block truncate mt-0.5">
+                  <span className="text-gray-400 text-xs block truncate mt-0.5">
                     {g.summary}
                   </span>
                 )}

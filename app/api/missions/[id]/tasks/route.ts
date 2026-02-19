@@ -37,11 +37,14 @@ export async function POST(
       ? new Date(body.due_date)
       : null;
 
+    const summary = body.summary && typeof body.summary === "string" ? body.summary.trim() || null : null;
+
     const order = mission.tasks.length;
     const task = await prisma.task.create({
       data: {
         missionId,
         name,
+        summary,
         dueDate,
         order,
       },

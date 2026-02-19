@@ -46,6 +46,7 @@ model Task {
   missionId   String    @map("mission_id")
   mission     Mission   @relation(fields: [missionId], references: [id], onDelete: Cascade)
   name        String
+  summary     String?
   done        Boolean   @default(false)
   completedAt DateTime? @map("completed_at")
   dueDate     DateTime? @map("due_date") @db.Date

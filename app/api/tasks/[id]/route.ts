@@ -28,7 +28,7 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const data: { name?: string; done?: boolean; completedAt?: Date | null; dueDate?: Date | null } = {};
+    const data: { name?: string; summary?: string | null; done?: boolean; completedAt?: Date | null; dueDate?: Date | null } = {};
 
     if (body.name !== undefined) {
       const name = (body.name ?? "").trim();
@@ -36,6 +36,9 @@ export async function PATCH(
         return NextResponse.json({ error: "名前は空にできません" }, { status: 400 });
       }
       data.name = name;
+    }
+    if (body.summary !== undefined) {
+      data.summary = body.summary && typeof body.summary === "string" ? body.summary.trim() || null : null;
     }
     if (body.due_date !== undefined) {
       data.dueDate = body.due_date && typeof body.due_date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(body.due_date)

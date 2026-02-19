@@ -21,6 +21,7 @@ export interface Task {
   id: string;
   missionId: string;
   name: string;
+  summary: string | null;
   done: boolean;
   completedAt: string | null;
   dueDate: string | null;

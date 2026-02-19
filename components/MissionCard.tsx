@@ -28,6 +28,7 @@ export function MissionCard({ mission, genre, onChanged, updateTaskOptimistic }:
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const [showTaskAddModal, setShowTaskAddModal] = useState(false);
   const [taskAddName, setTaskAddName] = useState("");
+  const [taskAddSummary, setTaskAddSummary] = useState("");
   const [taskAddDue, setTaskAddDue] = useState("");
   const [showRenameModal, setShowRenameModal] = useState(false);
   const [showSummaryModal, setShowSummaryModal] = useState(false);
@@ -106,6 +107,7 @@ export function MissionCard({ mission, genre, onChanged, updateTaskOptimistic }:
         credentials: "same-origin",
         body: JSON.stringify({
           name,
+          summary: taskAddSummary.trim() || null,
           due_date:
             taskAddDue && /^\d{4}-\d{2}-\d{2}$/.test(taskAddDue) ? taskAddDue : null,
         }),
@@ -115,6 +117,7 @@ export function MissionCard({ mission, genre, onChanged, updateTaskOptimistic }:
         throw new Error(data.error ?? "追加に失敗しました");
       }
       setTaskAddName("");
+      setTaskAddSummary("");
       setTaskAddDue("");
       setShowTaskAddModal(false);
       onChanged?.();
@@ -135,11 +138,11 @@ export function MissionCard({ mission, genre, onChanged, updateTaskOptimistic }:
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-4">
         <div className="flex-1 min-w-0">
           <h3 className="font-medium break-words">{mission.name}</h3>
-          <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-sm">
-            <span className="text-blue-400 font-medium">
+          <div className="flex flex-wrap sm:flex-nowrap gap-x-4 gap-y-1 mt-1 text-sm">
+            <span className="text-blue-400 font-medium whitespace-nowrap">
               期限: {dueDate ? formatDateJp(dueDate) : "未設定"}
             </span>
-            <span className="text-emerald-400 font-medium">
+            <span className="text-emerald-400 font-medium whitespace-nowrap">
               完了: {progress >= 1 && completedAt ? formatDateJp(completedAt) : "-"}
             </span>
           </div>
@@ -163,7 +166,7 @@ export function MissionCard({ mission, genre, onChanged, updateTaskOptimistic }:
       {expanded && (
         <div className="mt-4 pt-4 border-t border-gray-700 space-y-2" onClick={(e) => e.stopPropagation()}>
           {mission.summary && (
-            <p className="text-gray-400 text-sm">{mission.summary}</p>
+            <p className="text-gray-300 text-sm">{mission.summary}</p>
           )}
           {tasks.map((t) => (
             <motion.div
@@ -210,6 +213,16 @@ export function MissionCard({ mission, genre, onChanged, updateTaskOptimistic }:
               placeholder="例: API設計"
               className="w-full border border-gray-600 rounded px-3 py-2 bg-gray-800 text-gray-100 placeholder-gray-500"
               autoFocus
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-200">概要:</label>
+            <textarea
+              value={taskAddSummary}
+              onChange={(e) => setTaskAddSummary(e.target.value)}
+              placeholder="任意の概要を入力"
+              className="w-full border border-gray-600 rounded px-3 py-2 h-16 resize-none bg-gray-800 text-gray-100 placeholder-gray-500"
+              rows={2}
             />
           </div>
           <div>

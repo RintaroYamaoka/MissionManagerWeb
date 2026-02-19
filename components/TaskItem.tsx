@@ -24,6 +24,7 @@ interface TaskItemProps {
 export function TaskItem({ task, missionId, genreId, onChanged, updateTaskOptimistic }: TaskItemProps) {
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const [showRenameModal, setShowRenameModal] = useState(false);
+  const [showSummaryModal, setShowSummaryModal] = useState(false);
   const [showDueModal, setShowDueModal] = useState(false);
   const [optimisticDone, setOptimisticDone] = useState<boolean | null>(null);
 
@@ -97,6 +98,12 @@ export function TaskItem({ task, missionId, genreId, onChanged, updateTaskOptimi
     setShowRenameModal(false);
   };
 
+  const handleEditSummary = () => setShowSummaryModal(true);
+  const handleSummaryConfirm = async (summary: string) => {
+    await apiCall("PATCH", `/api/tasks/${task.id}`, { summary: summary || null });
+    setShowSummaryModal(false);
+  };
+
   const handleEditDue = () => setShowDueModal(true);
   const handleDueConfirm = async (due: string | null) => {
     await apiCall("PATCH", `/api/tasks/${task.id}`, { due_date: due });
@@ -133,17 +140,24 @@ export function TaskItem({ task, missionId, genreId, onChanged, updateTaskOptimi
         >
           {task.name}
         </div>
-        {(task.dueDate || displayedCompletedAt) && (
-          <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 text-xs">
+        {(task.summary || task.dueDate || displayedCompletedAt) && (
+          <div className="mt-1 text-xs space-y-0.5">
+            {task.summary && (
+              <p className="text-gray-400">{task.summary}</p>
+            )}
+            {(task.dueDate || displayedCompletedAt) && (
+              <div className="flex flex-wrap sm:flex-nowrap gap-x-3 gap-y-0.5">
             {task.dueDate && (
-              <span className="text-blue-400 font-medium">
+              <span className="text-blue-400 font-medium whitespace-nowrap">
                 期限: {formatDateJp(task.dueDate)}
               </span>
             )}
             {displayedCompletedAt && (
-              <span className="text-emerald-400 font-medium">
+              <span className="text-emerald-400 font-medium whitespace-nowrap">
                 完了: {formatDateJp(displayedCompletedAt)}
               </span>
+            )}
+              </div>
             )}
           </div>
         )}
@@ -155,6 +169,7 @@ export function TaskItem({ task, missionId, genreId, onChanged, updateTaskOptimi
           y={contextMenu.y}
           items={[
             { label: "名前変更", onClick: handleRename },
+            { label: "概要を編集", onClick: handleEditSummary },
             { label: "期限を編集", onClick: handleEditDue },
             { label: "上へ移動", onClick: handleMoveUp },
             { label: "下へ移動", onClick: handleMoveDown },
@@ -171,6 +186,16 @@ export function TaskItem({ task, missionId, genreId, onChanged, updateTaskOptimi
         initialValue={task.name}
         placeholder="タスク名"
         onConfirm={handleRenameConfirm}
+      />
+      <EditTextModal
+        isOpen={showSummaryModal}
+        onClose={() => setShowSummaryModal(false)}
+        title="概要を編集"
+        initialValue={task.summary ?? ""}
+        placeholder="概要を入力"
+        multiline
+        allowEmpty
+        onConfirm={handleSummaryConfirm}
       />
       <EditDateModal
         isOpen={showDueModal}
