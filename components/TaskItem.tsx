@@ -129,7 +129,7 @@ export function TaskItem({ task, missionId, genreId, onChanged, updateTaskOptimi
 
   return (
     <div
-      className="flex flex-col gap-1 py-3 px-3 sm:py-1.5 sm:px-2 rounded hover:bg-gray-700/50 active:bg-gray-700/70 min-h-[44px] touch-manipulation select-none"
+      className="long-press-context flex flex-col gap-1 py-3 px-3 sm:py-1.5 sm:px-2 rounded hover:bg-gray-700/50 active:bg-gray-700/70 min-h-[44px] touch-manipulation select-none"
       onClick={(e) => e.stopPropagation()}
       onClickCapture={(e) => {
         if (consumeLongPressClick()) {
@@ -137,6 +137,7 @@ export function TaskItem({ task, missionId, genreId, onChanged, updateTaskOptimi
           e.stopPropagation();
         }
       }}
+      onSelectStart={(e) => e.preventDefault()}
       {...handlers}
     >
       <div className="flex items-center gap-2 min-h-0">
