@@ -29,9 +29,13 @@ export async function PATCH(
       return NextResponse.json({ error: "名前は空にできません" }, { status: 400 });
     }
 
+    if (Object.keys(data).length === 0) {
+      return NextResponse.json({ genre });
+    }
+
     const updated = await prisma.genre.update({
       where: { id },
-      data: Object.keys(data).length ? data : undefined,
+      data,
     });
     return NextResponse.json({ genre: updated });
   } catch (error) {

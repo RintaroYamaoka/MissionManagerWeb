@@ -50,9 +50,13 @@ export async function PATCH(
       data.completedAt = body.done ? new Date() : null;
     }
 
+    if (Object.keys(data).length === 0) {
+      return NextResponse.json({ task });
+    }
+
     const updated = await prisma.task.update({
       where: { id },
-      data: Object.keys(data).length ? data : undefined,
+      data,
     });
 
     if (data.done !== undefined) {

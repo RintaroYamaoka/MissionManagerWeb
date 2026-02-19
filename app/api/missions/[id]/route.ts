@@ -41,9 +41,13 @@ export async function PATCH(
       return NextResponse.json({ error: "名前は空にできません" }, { status: 400 });
     }
 
+    if (Object.keys(data).length === 0) {
+      return NextResponse.json({ mission });
+    }
+
     const updated = await prisma.mission.update({
       where: { id },
-      data: Object.keys(data).length ? data : undefined,
+      data,
     });
     return NextResponse.json({ mission: updated });
   } catch (error) {
