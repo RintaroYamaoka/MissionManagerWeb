@@ -53,7 +53,7 @@ export function TaskItem({ task, missionId, genreId, onChanged, updateTaskOptimi
         credentials: "same-origin",
       });
       if (res.ok) {
-        onChanged?.();
+        // 楽観的更新済みのため refetch しない（DB反映遅れで古いデータが返り上書きされるのを防ぐ）
       } else {
         setOptimisticDone(task.done);
         if (genreId && updateTaskOptimistic) {
