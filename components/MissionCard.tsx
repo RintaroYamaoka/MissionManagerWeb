@@ -31,6 +31,7 @@ export function MissionCard({ mission, genre, onChanged, updateTaskOptimistic }:
   const [taskAddName, setTaskAddName] = useState("");
   const [taskAddSummary, setTaskAddSummary] = useState("");
   const [taskAddDue, setTaskAddDue] = useState("");
+  const [isAddingTask, setIsAddingTask] = useState(false);
   const [showRenameModal, setShowRenameModal] = useState(false);
   const [showSummaryModal, setShowSummaryModal] = useState(false);
   const [showDueModal, setShowDueModal] = useState(false);
@@ -102,6 +103,8 @@ export function MissionCard({ mission, genre, onChanged, updateTaskOptimistic }:
       alert("名前を入力してください。");
       return;
     }
+    if (isAddingTask) return;
+    setIsAddingTask(true);
     try {
       const res = await fetch(`/api/missions/${mission.id}/tasks`, {
         method: "POST",
@@ -125,6 +128,8 @@ export function MissionCard({ mission, genre, onChanged, updateTaskOptimistic }:
       onChanged?.();
     } catch (e) {
       setAlertMessage(e instanceof Error ? e.message : "不明なエラー");
+    } finally {
+      setIsAddingTask(false);
     }
   };
 
@@ -275,9 +280,10 @@ export function MissionCard({ mission, genre, onChanged, updateTaskOptimistic }:
             <button
               type="button"
               onClick={handleAddTask}
-              className="px-4 py-2.5 min-h-[44px] bg-emerald-600 text-white rounded hover:bg-emerald-500 active:bg-emerald-700 touch-manipulation"
+              disabled={isAddingTask}
+              className="px-4 py-2.5 min-h-[44px] bg-emerald-600 text-white rounded hover:bg-emerald-500 active:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
             >
-              OK
+              {isAddingTask ? "追加中..." : "OK"}
             </button>
           </div>
         </div>

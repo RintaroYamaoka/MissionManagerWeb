@@ -9,8 +9,10 @@
 </p>
 
 <p align="center">
-  <a href="#技術スタック">技術スタック</a> •
   <a href="#機能">機能</a> •
+  <a href="#技術スタック">技術スタック</a> •
+  <a href="#アーキテクチャ">アーキテクチャ</a> •
+  <a href="#設計のポイント">設計のポイント</a> •
   <a href="#セットアップ">セットアップ</a>
 </p>
 
@@ -49,6 +51,99 @@
 - **楽観的更新** — チェックボックス操作後、サーバー待ちなしで即時UI更新
 - **右クリックメニュー** — 名前変更、概要編集、期限編集、上へ/下へ移動、削除（期限・完了状況が同じ項目間のみ移動可、違う場合は「期限が優先されます」と表示）
 - **レスポンシブ** — PC・スマホに対応
+
+---
+
+## アーキテクチャ
+
+### システム構成
+
+```mermaid
+flowchart TB
+    subgraph クライアント
+        A[Next.js / React]
+    end
+
+    subgraph サーバー
+        B[API Routes]
+        C[Auth.js]
+    end
+
+    subgraph データ
+        D[Prisma]
+        E[(PostgreSQL / Neon)]
+    end
+
+    A --> B
+    A --> C
+    B --> D
+    C --> D
+    D --> E
+```
+
+### ディレクトリ構造
+
+```
+MissionManagerWeb/
+├── app/                    # Next.js App Router
+│   ├── api/                # API ルート
+│   │   ├── auth/           # 認証（NextAuth, 新規登録）
+│   │   ├── genres/         # ジャンル CRUD・移動
+│   │   ├── missions/       # ミッション CRUD・移動・タスク一覧
+│   │   └── tasks/          # タスク CRUD・移動
+│   ├── login/
+│   ├── register/
+│   ├── layout.tsx
+│   └── page.tsx
+├── components/             # PageContent, GenreSelector, MissionCard, TaskItem など
+├── hooks/                  # useGenres
+├── lib/                    # db.ts (Prisma), types.ts
+├── prisma/                 # schema.prisma
+├── auth.ts / auth.config.ts
+└── middleware.ts           # 認証ガード
+```
+
+### 主要な依存関係
+
+```mermaid
+flowchart LR
+    subgraph フロントエンド
+        Next[Next.js 14]
+        React[React 18]
+        Tailwind[Tailwind CSS]
+        Framer[Framer Motion]
+        Next --> React
+        Next --> Tailwind
+        Next --> Framer
+    end
+
+    subgraph バックエンド
+        API[API Routes]
+        Prisma[Prisma]
+        Auth[NextAuth v5]
+        API --> Prisma
+        API --> Auth
+    end
+
+    subgraph インフラ
+        Neon[(Neon PostgreSQL)]
+        Prisma --> Neon
+    end
+
+    Next --> API
+```
+
+### 設計のポイント
+
+| 観点 | 内容 |
+|------|------|
+| **責務の分離** | `Page` → `PageContent` → カスタムフック → コンポーネント の流れで、どこで何を担当しているかが明確 |
+| **データ取得の集約** | `useGenres` でジャンル一覧の取得・更新・楽観的更新を一元管理 |
+| **RESTful API** | ジャンル / ミッション / タスクの CRUD が一貫したエンドポイント構成 |
+| **認証スコープ** | middleware でルート保護し、各 API で `userId` によるデータアクセス制御 |
+| **楽観的更新** | チェックボックス操作を即座に UI に反映し、UX を重視 |
+| **N+1 回避** | Prisma の `include` で Genre → Mission → Task を一括取得 |
+| **型安全性** | TypeScript + Prisma によるエンドツーエンドの型保証 |
 
 ---
 
@@ -95,38 +190,6 @@ npm run dev
 ```
 
 → http://localhost:3000 でアクセス
-
----
-
-## スクリプト
-
-| コマンド | 説明 |
-|----------|------|
-| `npm run dev` | 開発サーバー起動 |
-| `npm run build` | プロダクションビルド |
-| `npm run start` | プロダクションサーバー起動 |
-| `npm run lint` | ESLint 実行 |
-| `npm run db:generate` | Prisma クライアント生成 |
-| `npm run db:push` | スキーマをDBに反映 |
-| `npm run db:studio` | Prisma Studio 起動 |
-
----
-
-## ディレクトリ構造
-
-```
-MissionManagerWeb/
-├── app/
-│   ├── api/           # 認証・ジャンル・ミッション・タスクAPI
-│   ├── login/         # ログイン
-│   ├── register/      # 新規登録
-│   └── page.tsx       # メインページ
-├── components/        # ヘッダー、ジャンル選択、ミッション一覧、タスク、モーダル等
-├── hooks/             # useGenres（楽観的更新含む）
-├── lib/               # Prisma, 型定義
-├── prisma/            # スキーマ・マイグレーション
-└── auth.ts            # Auth.js 設定
-```
 
 ---
 

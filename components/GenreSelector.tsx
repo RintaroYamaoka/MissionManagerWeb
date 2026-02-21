@@ -94,6 +94,7 @@ export function GenreSelector({
   const [showAddModal, setShowAddModal] = useState(false);
   const [addName, setAddName] = useState("");
   const [addSummary, setAddSummary] = useState("");
+  const [isAddingGenre, setIsAddingGenre] = useState(false);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; genre: Genre } | null>(null);
   const [showRenameModal, setShowRenameModal] = useState(false);
   const [showSummaryModal, setShowSummaryModal] = useState(false);
@@ -112,6 +113,8 @@ export function GenreSelector({
       setAlertMessage("名前を入力してください。");
       return;
     }
+    if (isAddingGenre) return;
+    setIsAddingGenre(true);
     try {
       const res = await fetch("/api/genres", {
         method: "POST",
@@ -131,6 +134,8 @@ export function GenreSelector({
       onSelect?.(data.genre);
     } catch (e) {
       setAlertMessage(e instanceof Error ? e.message : "不明なエラー");
+    } finally {
+      setIsAddingGenre(false);
     }
   };
 
@@ -343,9 +348,10 @@ export function GenreSelector({
             <button
               type="button"
               onClick={handleAdd}
-              className="px-4 py-2.5 min-h-[44px] bg-blue-600 text-white rounded hover:bg-blue-500 active:bg-blue-700 touch-manipulation"
+              disabled={isAddingGenre}
+              className="px-4 py-2.5 min-h-[44px] bg-blue-600 text-white rounded hover:bg-blue-500 active:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
             >
-              OK
+              {isAddingGenre ? "追加中..." : "OK"}
             </button>
           </div>
         </div>

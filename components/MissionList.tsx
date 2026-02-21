@@ -19,6 +19,7 @@ export function MissionList({ selectedGenre, refetch, refetchSilent, updateTaskO
   const [addName, setAddName] = useState("");
   const [addSummary, setAddSummary] = useState("");
   const [addDueDate, setAddDueDate] = useState("");
+  const [isAddingMission, setIsAddingMission] = useState(false);
 
   const missions: Mission[] = sortMissionsByDueAndIncomplete(selectedGenre?.missions ?? []);
 
@@ -29,6 +30,8 @@ export function MissionList({ selectedGenre, refetch, refetchSilent, updateTaskO
       alert("名前を入力してください。");
       return;
     }
+    if (isAddingMission) return;
+    setIsAddingMission(true);
     try {
       const res = await fetch(`/api/genres/${selectedGenre.id}/missions`, {
         method: "POST",
@@ -51,6 +54,8 @@ export function MissionList({ selectedGenre, refetch, refetchSilent, updateTaskO
       await (refetchSilent ?? refetch)();
     } catch (e) {
       alert(e instanceof Error ? e.message : "不明なエラー");
+    } finally {
+      setIsAddingMission(false);
     }
   };
 
@@ -148,9 +153,10 @@ export function MissionList({ selectedGenre, refetch, refetchSilent, updateTaskO
             <button
               type="button"
               onClick={handleAddMission}
-              className="px-4 py-2.5 min-h-[44px] bg-emerald-600 text-white rounded hover:bg-emerald-500 active:bg-emerald-700 touch-manipulation"
+              disabled={isAddingMission}
+              className="px-4 py-2.5 min-h-[44px] bg-emerald-600 text-white rounded hover:bg-emerald-500 active:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
             >
-              OK
+              {isAddingMission ? "追加中..." : "OK"}
             </button>
           </div>
         </div>
