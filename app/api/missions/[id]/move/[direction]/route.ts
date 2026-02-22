@@ -55,10 +55,35 @@ export async function POST(
       );
     }
 
-    await prisma.$transaction([
-      prisma.mission.update({ where: { id: a.id }, data: { order: b.order } }),
-      prisma.mission.update({ where: { id: b.id }, data: { order: a.order } }),
-    ]);
+    // 同一グループ内で order が重複している場合、スワップでは変化しないため並べ替えて再番号付けする
+    const groupStart = sorted.findIndex(
+      (m) =>
+        (missionProgress(m) < 1) === aIncomplete &&
+        (m.dueDate ? new Date(m.dueDate).getTime() : Infinity) === aDue
+    );
+    const diffIdx = sorted.slice(groupStart).findIndex(
+      (m) =>
+        (missionProgress(m) < 1) !== aIncomplete ||
+        (m.dueDate ? new Date(m.dueDate).getTime() : Infinity) !== aDue
+    );
+    const groupEnd = diffIdx < 0 ? sorted.length : groupStart + diffIdx;
+    const group = sorted.slice(groupStart, groupEnd);
+    const groupIdx = idx - groupStart;
+    const groupSwapIdx = swapIdx - groupStart;
+    const reordered = [...group];
+    [reordered[groupIdx], reordered[groupSwapIdx]] = [
+      reordered[groupSwapIdx],
+      reordered[groupIdx],
+    ];
+    const minOrder = Math.min(...group.map((m) => m.order));
+    await prisma.$transaction(
+      reordered.map((m, i) =>
+        prisma.mission.update({
+          where: { id: m.id },
+          data: { order: minOrder + i },
+        })
+      )
+    );
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("POST /api/missions/[id]/move/[direction]:", error);

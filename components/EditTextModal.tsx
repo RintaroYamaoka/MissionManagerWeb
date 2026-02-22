@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Modal } from "./Modal";
+import { AlertModal } from "./AlertModal";
 
 interface EditTextModalProps {
   isOpen: boolean;
@@ -25,11 +26,13 @@ export function EditTextModal({
   onConfirm,
 }: EditTextModalProps) {
   const [value, setValue] = useState(initialValue);
+  const [validationError, setValidationError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (isOpen) {
       setValue(initialValue);
+      setValidationError(null);
       setTimeout(() => inputRef.current?.focus(), 50);
     }
   }, [isOpen, initialValue]);
@@ -40,7 +43,7 @@ export function EditTextModal({
       onConfirm(trimmed);
       onClose();
     } else {
-      alert("値を入力してください。");
+      setValidationError("値を入力してください。");
     }
   };
 
@@ -92,6 +95,11 @@ export function EditTextModal({
           </button>
         </div>
       </div>
+      <AlertModal
+        isOpen={validationError !== null}
+        message={validationError ?? ""}
+        onClose={() => setValidationError(null)}
+      />
     </Modal>
   );
 }

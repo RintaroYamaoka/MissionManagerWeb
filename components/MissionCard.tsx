@@ -100,7 +100,7 @@ export function MissionCard({ mission, genre, onChanged, updateTaskOptimistic }:
   const handleAddTask = async () => {
     const name = taskAddName.trim();
     if (!name) {
-      alert("名前を入力してください。");
+      setAlertMessage("名前を入力してください。");
       return;
     }
     if (isAddingTask) return;

@@ -18,11 +18,18 @@ async function moveGenre(id: string, direction: "up" | "down") {
     return { error: "これ以上移動できません", status: 400 as const };
   }
 
-  const [a, b] = [siblings[idx], siblings[swapIdx]];
-  await prisma.$transaction([
-    prisma.genre.update({ where: { id: a.id }, data: { order: b.order } }),
-    prisma.genre.update({ where: { id: b.id }, data: { order: a.order } }),
-  ]);
+  // order が重複している場合、スワップでは変化しないため並べ替えて再番号付けする
+  const reordered = [...siblings];
+  [reordered[idx], reordered[swapIdx]] = [reordered[swapIdx], reordered[idx]];
+  const minOrder = Math.min(...siblings.map((g) => g.order));
+  await prisma.$transaction(
+    reordered.map((g, i) =>
+      prisma.genre.update({
+        where: { id: g.id },
+        data: { order: minOrder + i },
+      })
+    )
+  );
   return { ok: true };
 }
 

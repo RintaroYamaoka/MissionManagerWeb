@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { MissionCard } from "./MissionCard";
 import { Modal } from "./Modal";
+import { AlertModal } from "./AlertModal";
 import { sortMissionsByDueAndIncomplete } from "@/lib/types";
 import type { Genre, Mission } from "@/lib/types";
 
@@ -20,6 +21,7 @@ export function MissionList({ selectedGenre, refetch, refetchSilent, updateTaskO
   const [addSummary, setAddSummary] = useState("");
   const [addDueDate, setAddDueDate] = useState("");
   const [isAddingMission, setIsAddingMission] = useState(false);
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
 
   const missions: Mission[] = sortMissionsByDueAndIncomplete(selectedGenre?.missions ?? []);
 
@@ -27,7 +29,7 @@ export function MissionList({ selectedGenre, refetch, refetchSilent, updateTaskO
     if (!selectedGenre) return;
     const name = addName.trim();
     if (!name) {
-      alert("名前を入力してください。");
+      setAlertMessage("名前を入力してください。");
       return;
     }
     if (isAddingMission) return;
@@ -53,7 +55,7 @@ export function MissionList({ selectedGenre, refetch, refetchSilent, updateTaskO
       setShowAddModal(false);
       await (refetchSilent ?? refetch)();
     } catch (e) {
-      alert(e instanceof Error ? e.message : "不明なエラー");
+      setAlertMessage(e instanceof Error ? e.message : "不明なエラー");
     } finally {
       setIsAddingMission(false);
     }
@@ -161,6 +163,11 @@ export function MissionList({ selectedGenre, refetch, refetchSilent, updateTaskO
           </div>
         </div>
       </Modal>
+      <AlertModal
+        isOpen={alertMessage !== null}
+        message={alertMessage ?? ""}
+        onClose={() => setAlertMessage(null)}
+      />
     </div>
   );
 }
